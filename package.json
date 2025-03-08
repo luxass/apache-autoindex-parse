@@ -31,6 +31,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./traverse": {
+      "import": {
+        "types": "./dist/traverse.d.ts",
+        "default": "./dist/traverse.mjs"
+      },
+      "require": {
+        "types": "./dist/traverse.d.cts",
+        "default": "./dist/traverse.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
