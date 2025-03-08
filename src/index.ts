@@ -25,6 +25,21 @@ export interface RootEntry {
 
 export type AutoIndexFormat = "F0" | "F1" | "F2";
 
+/**
+ * Parses HTML content of an auto-indexed directory listing into a structured format.
+ *
+ * @param {string} html - The HTML content of the auto-indexed directory page to parse
+ * @param {AutoIndexFormat?} format - Optional format specification of the auto-index page (will be inferred if not provided)
+ * @returns {RootEntry | undefined} A RootEntry object representing the parsed directory structure, or null if parsing fails
+ *
+ * @example
+ * ```ts
+ * const html = await fetch('http://example.com/files/').then(res => res.text());
+ * const root = parse(html);
+ * console.log(root.path); // '/files/'
+ * console.log(root.children); // Array of file and directory entries
+ * ```
+ */
 export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
   const $ = cheerio.load(html);
 
@@ -57,13 +72,23 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
   };
 }
 
-function inferFormat($: cheerio.CheerioAPI): AutoIndexFormat | undefined {
+/**
+ * Infers the AutoIndexFormat from a Cheerio API object.
+ *
+ * This function examines the links on the page to determine the format
+ * of an Apache AutoIndex page. It looks for URL parameters that indicate
+ * the format (e.g., "F=2" in "?C=N;O=D;F=2").
+ *
+ * @param {cheerio.CheerioAPI} $ - A Cheerio API object representing the parsed HTML page
+ * @returns {AutoIndexFormat} The inferred format as an AutoIndexFormat string (e.g., "F0", "F1", "F2", etc.)
+ */
+function inferFormat($: cheerio.CheerioAPI): AutoIndexFormat {
   // try get all hrefs from the page
   const hrefs = $("a")
     .toArray()
     .map((element) => $(element).attr("href"))
     .filter((href) => href != null)
-    .filter((href) => !href.startsWith("?"));
+    .filter((href) => href.startsWith("?"));
 
   for (const href of hrefs) {
     // ?C=N;O=D;F=2
@@ -72,6 +97,8 @@ function inferFormat($: cheerio.CheerioAPI): AutoIndexFormat | undefined {
       return `F${match[1]}` as AutoIndexFormat;
     }
   }
+
+  return "F0";
 }
 
 function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
@@ -101,7 +128,7 @@ function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
         type: "directory",
         name: name.trim().slice(0, -1),
         path,
-        lastModified: Date.now(),
+        lastModified: undefined,
         children: [],
       });
     } else {
@@ -109,7 +136,7 @@ function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
         type: "file",
         name: name.trim(),
         path,
-        lastModified: Date.now(),
+        lastModified: undefined,
       });
     }
   }
