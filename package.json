@@ -1,7 +1,7 @@
 {
-  "name": "unicode-autoindex-parse",
+  "name": "apache-autoindex-parse",
   "version": "0.0.0",
-  "description": "parse unicode.org's public autoindex",
+  "description": "parse apache's autoindex html files",
   "type": "module",
   "author": {
     "name": "Lucas Nørgård",
@@ -10,15 +10,15 @@
   },
   "packageManager": "pnpm@10.5.2",
   "license": "MIT",
-  "homepage": "https://github.com/luxass/unicode-autoindex-parse",
-  "repository": "https://github.com/luxass/unicode-autoindex-parse",
+  "homepage": "https://github.com/luxass/apache-autoindex-parse",
+  "repository": "https://github.com/luxass/apache-autoindex-parse",
   "bugs": {
-    "url": "https://github.com/luxass/unicode-autoindex-parse/issues"
+    "url": "https://github.com/luxass/apache-autoindex-parse/issues"
   },
   "keywords": [
-    "unicode.org",
     "autoindex",
-    "parse"
+    "parse",
+    "apache"
   ],
   "exports": {
     ".": {
