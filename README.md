@@ -99,6 +99,9 @@ console.log(entry);
 // }
 ```
 
+> [!NOTE]
+> If you want to traverse an entire apache, you can utilize the `traverse` function which is being exported from `apache-autoindex-parse/traverse`.
+
 ## 📄 License
 
 Published under [MIT License](./LICENSE).
