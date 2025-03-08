@@ -1,5 +1,5 @@
-import type { AutoIndexFormat, RootEntry } from "./";
-import { parse } from "./";
+import type { AutoIndexFormat, RootEntry } from "./index";
+import { parse } from "./index";
 
 export interface TraverseOptions {
   /**
@@ -13,6 +13,12 @@ export interface TraverseOptions {
    * @default {}
    */
   extraHeaders?: Record<string, string>;
+
+  /**
+   * Optional signal to abort the fetch request
+   * @default undefined
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -24,42 +30,45 @@ export interface TraverseOptions {
  * @param {string} rootUrl - The URL of the Apache autoindex directory to traverse
  * @param {TraverseOptions?} options - Optional configuration for the traversal process
  * @returns {Promise<RootEntry | null>} A promise that resolves to a RootEntry object representing the directory structure, or null if parsing failed
- * @throws Will throw an error if the fetch request fails
  *
  * @example
  * ```typescript
- * const directoryStructure = await traverse('https://example.com/files/');
+ * const directoryStructure = await traverse('[https://example.com/files/](https://example.com/files/)');
  * ```
  */
 export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<RootEntry | null> {
-  const res = await fetch(rootUrl, {
-    headers: {
-      "User-Agent": "github.com/apache-autoindex-parse",
-      ...options?.extraHeaders,
-    },
-  });
+  try {
+    const res = await fetch(rootUrl, {
+      headers: {
+        "User-Agent": "github.com/apache-autoindex-parse",
+        ...options?.extraHeaders,
+      },
+      signal: options?.abortSignal,
+    });
 
-  if (!res.ok) {
-    throw new Error(`failed to fetch directory listing from ${rootUrl}`);
-  }
-
-  const html = await res.text();
-
-  const root = parse(html, options?.format);
-
-  // for each directory entry, fetch its children
-  for (const entry of root?.children ?? []) {
-    if (entry.type === "file") {
-      continue;
+    if (!res.ok) {
+      throw new Error(`failed to fetch directory listing from ${rootUrl}: ${res.status} ${res.statusText}`);
     }
 
-    const childUrl = new URL(entry.path, rootUrl).href;
-    const child = await traverse(childUrl, options);
+    const html = await res.text();
+    const root = parse(html, options?.format);
 
-    if (child == null) continue;
+    if (!root) return null;
 
-    entry.children = child.children;
+    await Promise.all(
+      root.children.map(async (entry) => {
+        if (entry.type === "directory") {
+          const childUrl = new URL(entry.path, rootUrl).href;
+          const child = await traverse(childUrl, options);
+          if (child) {
+            entry.children = child.children;
+          }
+        }
+      }),
+    );
+
+    return root;
+  } catch {
+    return null;
   }
-
-  return root;
 }
