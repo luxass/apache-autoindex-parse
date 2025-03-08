@@ -1,0 +1,67 @@
+{
+  "name": "unicode-autoindex-parse",
+  "version": "0.0.0",
+  "description": "parse unicode.org's public autoindex",
+  "type": "module",
+  "author": {
+    "name": "Lucas Nørgård",
+    "email": "lucasnrgaard@gmail.com",
+    "url": "https://luxass.dev"
+  },
+  "packageManager": "pnpm@10.5.2",
+  "license": "MIT",
+  "homepage": "https://github.com/luxass/unicode-autoindex-parse",
+  "repository": "https://github.com/luxass/unicode-autoindex-parse",
+  "bugs": {
+    "url": "https://github.com/luxass/unicode-autoindex-parse/issues"
+  },
+  "keywords": [
+    "unicode.org",
+    "autoindex",
+    "parse"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@luxass/eslint-config": "^4.15.0",
+    "@types/node": "^22.10.10",
+    "eslint": "^9.20.1",
+    "eslint-plugin-format": "^1.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
