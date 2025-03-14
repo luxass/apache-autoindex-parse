@@ -43,7 +43,7 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
 export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
   const $ = cheerio.load(html);
 
-  const title = $("title").text();
+  const title = $("title").first().text();
 
   const rootPath = title.split("Index of ")[1] ?? "/";
 
