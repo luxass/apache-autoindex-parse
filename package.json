@@ -57,9 +57,6 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "cheerio": "^1.0.0"
-  },
   "devDependencies": {
     "@luxass/eslint-config": "^4.15.0",
     "@types/node": "^22.10.10",

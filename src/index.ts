@@ -1,5 +1,3 @@
-import * as cheerio from "cheerio";
-
 export interface FileEntry {
   type: "file";
   name: string;
@@ -41,28 +39,27 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
  * ```
  */
 export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
-  const $ = cheerio.load(html);
-
-  const title = $("title").first().text();
-
-  const rootPath = title.split("Index of ")[1] ?? "/";
+  // extract title and root path
+  const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
+  const titleText = titleMatch?.[1] || "";
+  const rootPath = titleText.split("Index of ")[1] ?? "/";
 
   let entries: Entry[] = [];
 
   if (!format) {
-    format = inferFormat($);
+    format = inferFormat(html);
   }
 
   if (format === "F0") {
-    entries = parseF0($, rootPath);
+    entries = parseF0(html, rootPath);
   }
 
   if (format === "F1") {
-    entries = parseF1($, rootPath);
+    entries = parseF1(html, rootPath);
   }
 
   if (format === "F2") {
-    entries = parseF2($, rootPath);
+    entries = parseF2(html, rootPath);
   }
 
   return {
@@ -73,45 +70,52 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
 }
 
 /**
- * Infers the AutoIndexFormat from a Cheerio API object.
+ * Infers the AutoIndexFormat from HTML content.
  *
  * This function examines the links on the page to determine the format
  * of an Apache AutoIndex page. It looks for URL parameters that indicate
  * the format (e.g., "F=2" in "?C=N;O=D;F=2").
  *
- * @param {cheerio.CheerioAPI} $ - A Cheerio API object representing the parsed HTML page
+ * @param {string} html - The HTML content to analyze
  * @returns {AutoIndexFormat} The inferred format as an AutoIndexFormat string (e.g., "F0", "F1", "F2", etc.)
  */
-function inferFormat($: cheerio.CheerioAPI): AutoIndexFormat {
-  // try get all hrefs from the page
-  const hrefs = $("a")
-    .toArray()
-    .map((element) => $(element).attr("href"))
-    .filter((href) => href != null)
-    .filter((href) => href.startsWith("?"));
+function inferFormat(html: string): AutoIndexFormat {
+  // find all href attributes in anchor tags using a regex
+  const hrefRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi;
 
+  // extract all hrefs that start with "?"
+  const hrefs = Array.from(html.matchAll(hrefRegex))
+    .map((match) => match[1])
+    .filter((href): href is string => href !== undefined && href.startsWith("?"));
+
+  // look for format parameter
   for (const href of hrefs) {
-    // ?C=N;O=D;F=2
-    const match = href?.match(/F=(\d)/);
-    if (match) {
-      return `F${match[1]}` as AutoIndexFormat;
+    const formatMatch = href.match(/F=(\d)/);
+    if (formatMatch && formatMatch[1]) {
+      return `F${formatMatch[1]}` as AutoIndexFormat;
     }
   }
 
   return "F0";
 }
 
-function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
-  const ul = $("ul").first();
-
+function parseF0(html: string, rootPath: string): Entry[] {
   const entries: Entry[] = [];
 
-  const children = ul.children("li").toArray();
+  // find the first ul element and its li children
+  const ulMatch = html.match(/<ul[^>]*>([\s\S]*?)<\/ul>/i);
 
-  for (const li of children) {
-    const a = $(li).children("a");
-    const href = a.attr("href") ?? "";
-    const name = a.text().trim();
+  if (!ulMatch || !ulMatch[1]) return entries;
+
+  const ulContent = ulMatch[1];
+  const liRegex = /<li[^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>[\s\S]*?<\/li>/gi;
+
+  // use matchAll to get all matches at once
+  const matches = Array.from(ulContent.matchAll(liRegex));
+
+  for (const match of matches) {
+    const href = match[1] || "";
+    const name = (match[2] || "").trim();
 
     const isDirectory = href.endsWith("/");
 
@@ -119,14 +123,14 @@ function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
       continue;
     }
 
-    const path = /^https?:\/\//.test(href ?? "")
-      ? href!
+    const path = /^https?:\/\//.test(href)
+      ? href
       : `${rootPath}/${href}`;
 
     if (isDirectory) {
       entries.push({
         type: "directory",
-        name: name.trim().slice(0, -1),
+        name: name.slice(0, -1),
         path,
         lastModified: undefined,
         children: [],
@@ -134,7 +138,7 @@ function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
     } else {
       entries.push({
         type: "file",
-        name: name.trim(),
+        name,
         path,
         lastModified: undefined,
       });
@@ -144,112 +148,133 @@ function parseF0($: cheerio.CheerioAPI, rootPath: string): Entry[] {
   return entries;
 }
 
-function parseF1($: cheerio.CheerioAPI, rootPath: string): Entry[] {
+function parseF1(html: string, rootPath: string): Entry[] {
   const entries: Entry[] = [];
 
-  // select all rows except the header and parent directory
-  $("pre").find("a").each((_, element) => {
-    const $element = $(element);
-    const href = $element.attr("href");
-    const text = $element.text().trim();
+  // find all pre elements
+  const preRegex = /<pre[^>]*>([\s\S]*?)<\/pre>/gi;
+  const preMatches = Array.from(html.matchAll(preRegex));
 
-    // skip parent directory link
-    if (href === "/Public/") return;
+  for (const preMatch of preMatches) {
+    if (!preMatch[1]) continue;
+    const preContent = preMatch[1];
 
-    // get the img element that comes before this anchor
-    const imgElement = $element.prev("img");
-    const imgAlt = imgElement.attr("alt");
+    // find all anchor tags with their preceding img tags
+    const entryRegex = /<img[^>]+alt=["'](\[(?:DIR|TXT)\])["'][^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>([\s\S]*?)(?=<img|$)/gi;
+    const entryMatches = Array.from(preContent.matchAll(entryRegex));
 
-    // only process directories and files
-    if (imgAlt === "[DIR]" || imgAlt === "[TXT]") {
-      // Determine entry type
-      const type = imgAlt === "[DIR]" ? "directory" : "file";
+    for (const entryMatch of entryMatches) {
+      const imgAlt = entryMatch[1] || "";
+      const href = entryMatch[2] || "";
+      const text = (entryMatch[3] || "").trim();
+      const rowText = entryMatch[4] || "";
 
-      // get the parent <pre> row
-      const $row = $element.parent();
+      // skip parent directory link
+      if (href === "/Public/") continue;
 
-      // extract date from text content using regex
-      const rowText = $row.text();
-      const dateMatch = rowText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
+      // only process directories and files
+      if (imgAlt === "[DIR]" || imgAlt === "[TXT]") {
+        // determine entry type
+        const type = imgAlt === "[DIR]" ? "directory" : "file";
 
-      // parse the date if found
-      let lastModified;
-      if (dateMatch) {
-        const dateString = dateMatch[0];
-        const date = new Date(`${dateString.replace(" ", "T")}:00Z`);
-        if (!Number.isNaN(date.getTime())) {
-          lastModified = date.getTime();
+        // extract date from text content using regex
+        const dateMatch = rowText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
+
+        // parse the date if found
+        let lastModified;
+        if (dateMatch && dateMatch[0]) {
+          const dateString = dateMatch[0];
+          const date = new Date(`${dateString.replace(" ", "T")}:00Z`);
+          if (!Number.isNaN(date.getTime())) {
+            lastModified = date.getTime();
+          }
+        }
+
+        // create path by joining rootPath with href
+        const path = /^https?:\/\//.test(href)
+          ? href
+          : `${rootPath}/${href}`;
+
+        if (type === "directory") {
+          entries.push({
+            type,
+            name: text,
+            path,
+            lastModified,
+            children: [],
+          });
+        } else {
+          entries.push({
+            type,
+            name: text,
+            path,
+            lastModified,
+          });
         }
       }
-
-      // create path by joining rootPath with href
-      const path = /^https?:\/\//.test(href ?? "")
-        ? href!
-        : `${rootPath}/${href}`;
-
-      if (type === "directory") {
-        entries.push({
-          type,
-          name: text,
-          path,
-          lastModified,
-          children: [],
-        });
-      } else {
-        entries.push({
-          type,
-          name: text,
-          path,
-          lastModified,
-        });
-      }
     }
-  });
+  }
 
   return entries;
 }
 
-function parseF2($: cheerio.CheerioAPI, rootPath: string): Entry[] {
+function parseF2(html: string, rootPath: string): Entry[] {
   const entries: Entry[] = [];
 
-  // select all table rows (skip header rows and divider rows)
-  $("table tr").each((_, row) => {
-    const $row = $(row);
-    const $cells = $row.find("td");
+  // find the table and extract rows
+  const tableMatch = html.match(/<table[^>]*>([\s\S]*?)<\/table>/i);
 
-    // skip if no cells, header rows, or divider rows
-    if ($cells.length === 0 || $row.find("th").length > 0 || $row.find("hr").length > 0) {
-      return;
+  if (!tableMatch || !tableMatch[1]) return entries;
+
+  const tableContent = tableMatch[1];
+  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+
+  // get all rows at once
+  const rowMatches = Array.from(tableContent.matchAll(rowRegex));
+
+  for (const rowMatch of rowMatches) {
+    if (!rowMatch[1]) continue;
+    const rowContent = rowMatch[1];
+
+    // skip header rows and divider rows
+    if (rowContent.includes("<th") || rowContent.includes("<hr")) {
+      continue;
     }
 
-    // get the first cell with the image
-    const $imgCell = $cells.eq(0);
-    const $img = $imgCell.find("img");
-    const imgAlt = $img.attr("alt");
+    // extract cells
+    const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+    const cellMatches = Array.from(rowContent.matchAll(cellRegex));
+    const cells = cellMatches.map((match) => match[1] || "");
+
+    if (cells.length < 3) continue;
+
+    // get image alt from first cell
+    const imgAltMatch = cells[0]?.match(/<img[^>]+alt=["'](\[[^\]]+\])["'][^>]*>/i);
+    if (!imgAltMatch || !imgAltMatch[1]) continue;
+
+    const imgAlt = imgAltMatch[1];
 
     // skip if not a directory or file
     if (imgAlt !== "[DIR]" && imgAlt !== "[TXT]") {
       // skip parent directory
-      if (imgAlt === "[PARENTDIR]") return;
+      if (imgAlt === "[PARENTDIR]") continue;
 
       // skip rows without recognizable type
-      if (!imgAlt || !imgAlt.startsWith("[")) return;
+      if (!imgAlt.startsWith("[")) continue;
     }
 
     // get link and name from second cell
-    const $linkCell = $cells.eq(1);
-    const $link = $linkCell.find("a");
-    if (!$link.length) return;
+    const linkMatch = cells[1]?.match(/<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>/i);
+    if (!linkMatch || !linkMatch[1]) continue;
 
-    const href = $link.attr("href");
-    const name = $link.text().trim();
+    const href = linkMatch[1] || "";
+    const name = (linkMatch[2] || "").trim();
 
     // skip parent directory
-    if (name === "Parent Directory") return;
+    if (name === "Parent Directory") continue;
 
     // get date from the third cell
-    const $dateCell = $cells.eq(2);
-    const dateText = $dateCell.text().trim();
+    const dateText = cells[2]?.replace(/<[^>]+>/g, "").trim();
 
     // parse the date
     let lastModified;
@@ -261,11 +286,11 @@ function parseF2($: cheerio.CheerioAPI, rootPath: string): Entry[] {
     }
 
     // determine type
-    const type = imgAlt === "[DIR]" || href?.endsWith("/") ? "directory" : "file";
+    const type = imgAlt === "[DIR]" || href.endsWith("/") ? "directory" : "file";
 
     // create path by joining rootPath with href
-    const path = /^https?:\/\//.test(href ?? "")
-      ? href!
+    const path = /^https?:\/\//.test(href)
+      ? href
       : `${rootPath}/${href}`;
 
     if (type === "directory") {
@@ -284,7 +309,7 @@ function parseF2($: cheerio.CheerioAPI, rootPath: string): Entry[] {
         lastModified,
       });
     }
-  });
+  }
 
   return entries;
 }
