@@ -1,6 +1,6 @@
 {
   "name": "apache-autoindex-parse",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "parse apache's autoindex html files",
   "type": "module",
   "author": {
