@@ -51,15 +51,15 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
   }
 
   if (format === "F0") {
-    entries = parseF0(html, rootPath);
+    entries = parseF0(html);
   }
 
   if (format === "F1") {
-    entries = parseF1(html, rootPath);
+    entries = parseF1(html);
   }
 
   if (format === "F2") {
-    entries = parseF2(html, rootPath);
+    entries = parseF2(html);
   }
 
   return {
@@ -99,7 +99,7 @@ function inferFormat(html: string): AutoIndexFormat {
   return "F0";
 }
 
-function parseF0(html: string, rootPath: string): Entry[] {
+function parseF0(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // find the first ul element and its li children
@@ -123,9 +123,7 @@ function parseF0(html: string, rootPath: string): Entry[] {
       continue;
     }
 
-    const path = /^https?:\/\//.test(href)
-      ? href
-      : `${rootPath}/${href}`;
+    const path = href;
 
     if (isDirectory) {
       entries.push({
@@ -148,7 +146,7 @@ function parseF0(html: string, rootPath: string): Entry[] {
   return entries;
 }
 
-function parseF1(html: string, rootPath: string): Entry[] {
+function parseF1(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // find all pre elements
@@ -190,10 +188,8 @@ function parseF1(html: string, rootPath: string): Entry[] {
           }
         }
 
-        // create path by joining rootPath with href
-        const path = /^https?:\/\//.test(href)
-          ? href
-          : `${rootPath}/${href}`;
+        // use just the href as path
+        const path = href;
 
         if (type === "directory") {
           entries.push({
@@ -218,7 +214,7 @@ function parseF1(html: string, rootPath: string): Entry[] {
   return entries;
 }
 
-function parseF2(html: string, rootPath: string): Entry[] {
+function parseF2(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // find the table and extract rows
@@ -288,10 +284,8 @@ function parseF2(html: string, rootPath: string): Entry[] {
     // determine type
     const type = imgAlt === "[DIR]" || href.endsWith("/") ? "directory" : "file";
 
-    // create path by joining rootPath with href
-    const path = /^https?:\/\//.test(href)
-      ? href
-      : `${rootPath}/${href}`;
+    // use just the href as path
+    const path = href;
 
     if (type === "directory") {
       entries.push({

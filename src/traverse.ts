@@ -58,6 +58,7 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
     await Promise.all(
       root.children.map(async (entry) => {
         if (entry.type === "directory") {
+          // Combine rootUrl with entry.path since entry.path is now relative
           const childUrl = new URL(entry.path, rootUrl).href;
           const child = await traverse(childUrl, options);
           if (child) {
