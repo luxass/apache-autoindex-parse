@@ -12,23 +12,23 @@ it("should parse apache index files (F=0)", () => {
   const paths = entry?.children.map((entry) => entry.path);
 
   expect(paths).toStrictEqual([
-    "/Public/emoji/1.0/",
-    "/Public/emoji/2.0/",
-    "/Public/emoji/3.0/",
-    "/Public/emoji/4.0/",
-    "/Public/emoji/5.0/",
-    "/Public/emoji/11.0/",
-    "/Public/emoji/12.0/",
-    "/Public/emoji/12.1/",
-    "/Public/emoji/13.0/",
-    "/Public/emoji/13.1/",
-    "/Public/emoji/14.0/",
-    "/Public/emoji/15.0/",
-    "/Public/emoji/15.1/",
-    "/Public/emoji/16.0/",
-    "/Public/emoji/17.0/",
-    "/Public/emoji/ReadMe.txt",
-    "/Public/emoji/latest/",
+    "1.0/",
+    "2.0/",
+    "3.0/",
+    "4.0/",
+    "5.0/",
+    "11.0/",
+    "12.0/",
+    "12.1/",
+    "13.0/",
+    "13.1/",
+    "14.0/",
+    "15.0/",
+    "15.1/",
+    "16.0/",
+    "17.0/",
+    "ReadMe.txt",
+    "latest/",
   ]);
 
   const files = entry?.children.filter((entry) => entry.type === "file");
@@ -38,7 +38,7 @@ it("should parse apache index files (F=0)", () => {
     {
       type: "file",
       name: "ReadMe.txt",
-      path: "/Public/emoji/ReadMe.txt",
+      path: "ReadMe.txt",
       lastModified: undefined,
     },
   ]);
@@ -54,23 +54,23 @@ it("should parse apache index files (F=1)", () => {
   const paths = entry?.children.map((entry) => entry.path);
 
   expect(paths).toStrictEqual([
-    "/Public/emoji/1.0/",
-    "/Public/emoji/2.0/",
-    "/Public/emoji/3.0/",
-    "/Public/emoji/4.0/",
-    "/Public/emoji/5.0/",
-    "/Public/emoji/11.0/",
-    "/Public/emoji/12.0/",
-    "/Public/emoji/12.1/",
-    "/Public/emoji/13.0/",
-    "/Public/emoji/13.1/",
-    "/Public/emoji/14.0/",
-    "/Public/emoji/15.0/",
-    "/Public/emoji/15.1/",
-    "/Public/emoji/16.0/",
-    "/Public/emoji/17.0/",
-    "/Public/emoji/ReadMe.txt",
-    "/Public/emoji/latest/",
+    "1.0/",
+    "2.0/",
+    "3.0/",
+    "4.0/",
+    "5.0/",
+    "11.0/",
+    "12.0/",
+    "12.1/",
+    "13.0/",
+    "13.1/",
+    "14.0/",
+    "15.0/",
+    "15.1/",
+    "16.0/",
+    "17.0/",
+    "ReadMe.txt",
+    "latest/",
   ]);
 
   const files = entry?.children.filter((entry) => entry.type === "file");
@@ -80,7 +80,7 @@ it("should parse apache index files (F=1)", () => {
     {
       type: "file",
       name: "ReadMe.txt",
-      path: "/Public/emoji/ReadMe.txt",
+      path: "ReadMe.txt",
       lastModified: expect.any(Number),
     },
   ]);
@@ -96,23 +96,23 @@ it("should parse apache index files (F=2)", () => {
   const paths = entry?.children.map((entry) => entry.path);
 
   expect(paths).toStrictEqual([
-    "/Public/emoji/1.0/",
-    "/Public/emoji/2.0/",
-    "/Public/emoji/3.0/",
-    "/Public/emoji/4.0/",
-    "/Public/emoji/5.0/",
-    "/Public/emoji/11.0/",
-    "/Public/emoji/12.0/",
-    "/Public/emoji/12.1/",
-    "/Public/emoji/13.0/",
-    "/Public/emoji/13.1/",
-    "/Public/emoji/14.0/",
-    "/Public/emoji/15.0/",
-    "/Public/emoji/15.1/",
-    "/Public/emoji/16.0/",
-    "/Public/emoji/17.0/",
-    "/Public/emoji/ReadMe.txt",
-    "/Public/emoji/latest/",
+    "1.0/",
+    "2.0/",
+    "3.0/",
+    "4.0/",
+    "5.0/",
+    "11.0/",
+    "12.0/",
+    "12.1/",
+    "13.0/",
+    "13.1/",
+    "14.0/",
+    "15.0/",
+    "15.1/",
+    "16.0/",
+    "17.0/",
+    "ReadMe.txt",
+    "latest/",
   ]);
 
   const files = entry?.children.filter((entry) => entry.type === "file");
@@ -122,7 +122,7 @@ it("should parse apache index files (F=2)", () => {
     {
       type: "file",
       name: "ReadMe.txt",
-      path: "/Public/emoji/ReadMe.txt",
+      path: "ReadMe.txt",
       lastModified: expect.any(Number),
     },
   ]);
@@ -139,23 +139,23 @@ describe("auto-inferred format", () => {
     const paths = entry?.children.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
-      "/Public/emoji/1.0/",
-      "/Public/emoji/2.0/",
-      "/Public/emoji/3.0/",
-      "/Public/emoji/4.0/",
-      "/Public/emoji/5.0/",
-      "/Public/emoji/11.0/",
-      "/Public/emoji/12.0/",
-      "/Public/emoji/12.1/",
-      "/Public/emoji/13.0/",
-      "/Public/emoji/13.1/",
-      "/Public/emoji/14.0/",
-      "/Public/emoji/15.0/",
-      "/Public/emoji/15.1/",
-      "/Public/emoji/16.0/",
-      "/Public/emoji/17.0/",
-      "/Public/emoji/ReadMe.txt",
-      "/Public/emoji/latest/",
+      "1.0/",
+      "2.0/",
+      "3.0/",
+      "4.0/",
+      "5.0/",
+      "11.0/",
+      "12.0/",
+      "12.1/",
+      "13.0/",
+      "13.1/",
+      "14.0/",
+      "15.0/",
+      "15.1/",
+      "16.0/",
+      "17.0/",
+      "ReadMe.txt",
+      "latest/",
     ]);
 
     const lastModified = entry?.children.map((entry) => entry.lastModified);
@@ -169,7 +169,7 @@ describe("auto-inferred format", () => {
       {
         type: "file",
         name: "ReadMe.txt",
-        path: "/Public/emoji/ReadMe.txt",
+        path: "ReadMe.txt",
         lastModified: undefined,
       },
     ]);
@@ -185,23 +185,23 @@ describe("auto-inferred format", () => {
     const paths = entry?.children.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
-      "/Public/emoji/1.0/",
-      "/Public/emoji/2.0/",
-      "/Public/emoji/3.0/",
-      "/Public/emoji/4.0/",
-      "/Public/emoji/5.0/",
-      "/Public/emoji/11.0/",
-      "/Public/emoji/12.0/",
-      "/Public/emoji/12.1/",
-      "/Public/emoji/13.0/",
-      "/Public/emoji/13.1/",
-      "/Public/emoji/14.0/",
-      "/Public/emoji/15.0/",
-      "/Public/emoji/15.1/",
-      "/Public/emoji/16.0/",
-      "/Public/emoji/17.0/",
-      "/Public/emoji/ReadMe.txt",
-      "/Public/emoji/latest/",
+      "1.0/",
+      "2.0/",
+      "3.0/",
+      "4.0/",
+      "5.0/",
+      "11.0/",
+      "12.0/",
+      "12.1/",
+      "13.0/",
+      "13.1/",
+      "14.0/",
+      "15.0/",
+      "15.1/",
+      "16.0/",
+      "17.0/",
+      "ReadMe.txt",
+      "latest/",
     ]);
 
     const lastModified = entry?.children.map((entry) => entry.lastModified);
@@ -215,7 +215,7 @@ describe("auto-inferred format", () => {
       {
         type: "file",
         name: "ReadMe.txt",
-        path: "/Public/emoji/ReadMe.txt",
+        path: "ReadMe.txt",
         lastModified: expect.any(Number),
       },
     ]);
