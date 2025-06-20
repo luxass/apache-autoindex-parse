@@ -79,7 +79,7 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
  * @param {string} html - The HTML content to analyze
  * @returns {AutoIndexFormat} The inferred format as an AutoIndexFormat string (e.g., "F0", "F1", "F2", etc.)
  */
-function inferFormat(html: string): AutoIndexFormat {
+export function inferFormat(html: string): AutoIndexFormat {
   // find all href attributes in anchor tags using a regex
   const hrefRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi;
 
