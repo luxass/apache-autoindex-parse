@@ -157,28 +157,49 @@ function parseF1(html: string): Entry[] {
     if (!preMatch[1]) continue;
     const preContent = preMatch[1];
 
-    // find all anchor tags with their preceding img tags
-    const entryRegex = /<img[^>]+alt=["'](\[(?:DIR|TXT)\])["'][^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>([\s\S]*?)(?=<img|$)/gi;
-    const entryMatches = Array.from(preContent.matchAll(entryRegex));
+    // split content by lines to process each entry
+    const lines = preContent.split("\n");
 
-    for (const entryMatch of entryMatches) {
-      const imgAlt = entryMatch[1] || "";
-      const href = entryMatch[2] || "";
-      const text = (entryMatch[3] || "").trim();
-      const rowText = entryMatch[4] || "";
+    for (const line of lines) {
+      // skip header lines, hr tags, and empty lines
+      if (line.includes("<hr>") || line.trim() === "") {
+        continue;
+      }
 
-      // skip parent directory link
-      if (href === "/Public/") continue;
+      // skip lines that are only header links (contain sorting links but no file links)
+      if (line.includes("Last modified") && line.includes("?C=") && !line.match(/<a[^>]+href=["'](?!\?)[^"']+["'][^>]*>/)) {
+        continue;
+      }
 
-      // only process directories and files
-      if (imgAlt === "[DIR]" || imgAlt === "[TXT]") {
-        // determine entry type
-        const type = imgAlt === "[DIR]" ? "directory" : "file";
+      // check if this line contains links (but not sorting links)
+      const linkMatches = line.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi);
 
-        // extract date from text content using regex
-        const dateMatch = rowText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
+      for (const linkMatch of linkMatches) {
+        const href = linkMatch[1] || "";
+        const linkText = (linkMatch[2] || "").trim();
 
-        // parse the date if found
+        // skip sorting links (those that start with ?)
+        if (href.startsWith("?")) continue;
+
+        // skip parent directory link
+        if (linkText === "Parent Directory" || href === "/") continue;
+
+        // determine if this is a directory or file
+        // Check for img tag with alt attribute first
+        let type: "directory" | "file" = "file";
+        const imgMatch = line.match(/<img[^>]+alt=["'](\[[^\]]+\])["'][^>]*>/i);
+
+        if (imgMatch) {
+          // has image - use alt attribute to determine type
+          const imgAlt = imgMatch[1];
+          type = imgAlt === "[DIR]" ? "directory" : "file";
+        } else {
+          // no image - determine by href ending with /
+          type = href.endsWith("/") ? "directory" : "file";
+        }
+
+        // extract date from the line content
+        const dateMatch = line.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
         let lastModified;
         if (dateMatch && dateMatch[0]) {
           const dateString = dateMatch[0];
@@ -188,13 +209,28 @@ function parseF1(html: string): Entry[] {
           }
         }
 
-        // use just the href as path
+        // clean up the name - remove trailing / for directories and decode HTML entities
+        let name = linkText;
+        if (type === "directory" && name.endsWith("/")) {
+          name = name.slice(0, -1);
+        }
+
+        // handle truncated names (ending with ..>)
+        if (name.endsWith("..>")) {
+          // try to extract the full name from href
+          const decodedHref = decodeURIComponent(href);
+          if (decodedHref !== href) {
+            // use the decoded href as the name (removing extension or trailing /)
+            name = decodedHref.replace(/\/$/, "").split("/").pop() || name;
+          }
+        }
+
         const path = href;
 
         if (type === "directory") {
           entries.push({
             type,
-            name: text,
+            name,
             path,
             lastModified,
             children: [],
@@ -202,7 +238,7 @@ function parseF1(html: string): Entry[] {
         } else {
           entries.push({
             type,
-            name: text,
+            name,
             path,
             lastModified,
           });

@@ -112,7 +112,7 @@ describe("F1", () => {
   it("parse special files", () => {
     const html = readFileSync(fixture("special-files.html"), "utf-8");
 
-    const entry = parse(html, "F0");
+    const entry = parse(html, "F1");
 
     expect(entry).toBeDefined();
 
