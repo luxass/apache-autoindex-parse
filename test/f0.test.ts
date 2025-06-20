@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { inferFormat, parse } from "../src";
 import { createFixture } from "./__utils";
 
-const fixture = createFixture("F1");
+const fixture = createFixture("F0");
 
 // eslint-disable-next-line test/prefer-lowercase-title
 describe("F0", () => {

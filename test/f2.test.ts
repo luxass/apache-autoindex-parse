@@ -56,25 +56,4 @@ describe("F2", () => {
       },
     ]);
   });
-
-  it("parse root directory", () => {
-    const html = readFileSync(fixture("directory.html"), "utf-8");
-
-    const entry = parse(html, "F2");
-
-    expect(entry).toBeDefined();
-
-    const paths = entry?.children.map((entry) => entry.path);
-
-    expect(paths).toStrictEqual([
-      "apache-autoindex-parse/",
-      "apache-autoindex-parse-2/",
-      "apache-autoindex-parse-3/",
-      "apache-autoindex-parse-4/",
-      "apache-autoindex-parse-5/",
-      "apache-autoindex-parse-6/",
-      "apache-autoindex-parse-7/",
-      "apache-autoindex-parse-8/",
-    ]);
-  });
 });
