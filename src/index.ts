@@ -96,6 +96,10 @@ export function inferFormat(html: string | HTMLElement): AutoIndexFormat {
   const hrefs = [];
 
   const pre = html.querySelector("pre");
+
+  const hasPre = pre !== null;
+  const hasTable = html.querySelector("table") !== null;
+
   // F1 is the only format that uses <pre> tags for wrapping the links
   // which breaks the parsing logic of 'node-html-parser'
   // so we need to handle it separately
@@ -128,6 +132,14 @@ export function inferFormat(html: string | HTMLElement): AutoIndexFormat {
     const formatMatch = href.match(/F=(\d)/);
     if (formatMatch && formatMatch[1]) {
       return `F${formatMatch[1]}` as AutoIndexFormat;
+    }
+
+    if (hasPre) {
+      return "F1";
+    }
+
+    if (hasTable) {
+      return "F2";
     }
   }
 
