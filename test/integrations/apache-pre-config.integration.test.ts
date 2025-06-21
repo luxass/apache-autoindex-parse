@@ -65,7 +65,6 @@ describe("Apache Integration Test (Pre Config)", async () => {
     const html = await response.text();
 
     expect(response.ok).toBe(true);
-
     const entry = parse(html);
 
     expect(entry).toBeDefined();

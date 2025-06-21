@@ -194,99 +194,58 @@ function parseF0(html: HTMLElement): Entry[] {
 function parseF1(html: HTMLElement): Entry[] {
   const entries: Entry[] = [];
 
-  const preElements = html.querySelectorAll("pre");
-  if (preElements.length === 0) return entries;
+  const preElement = html.querySelector("pre");
+  if (!preElement) return entries;
+  const root = __parse(preElement.textContent);
 
-  for (const pre of preElements) {
-    const preContent = pre.textContent || "";
+  // Find all the links in the pre content
+  const links = root.querySelectorAll("a");
 
-    // split content by lines to process each entry
-    const lines = preContent.split("\n");
+  for (const link of links) {
+    const href = link.getAttribute("href") || "";
+    const name = link.textContent.trim();
 
-    for (const line of lines) {
-      // skip header lines, hr tags, and empty lines
-      if (line.includes("<hr>") || line.trim() === "") {
-        continue;
+    // Skip parent directory and sort links
+    if (name === "Parent Directory" || href.startsWith("?")) {
+      continue;
+    }
+
+    // Determine if it's a directory or file
+    const isDirectory = href.endsWith("/");
+    const type = isDirectory ? "directory" : "file";
+
+    // Get the parent element to extract additional info
+    const parentText = link.parentNode?.textContent || "";
+
+    // Extract date and time using regex
+    let lastModified;
+    const dateMatch = parentText.match(/(\d{2}-\w{3}-\d{4}\s+\d{2}:\d{2}|\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
+    if (dateMatch && dateMatch[0]) {
+      const dateString = dateMatch[0];
+      const date = new Date(dateString);
+      if (!Number.isNaN(date.getTime())) {
+        lastModified = date.getTime();
       }
+    }
 
-      // skip lines that are only header links (contain sorting links but no file links)
-      if (line.includes("Last modified") && line.includes("?C=") && !line.match(/<a[^>]+href=["'](?!\?)[^"']+["'][^>]*>/)) {
-        continue;
-      }
+    // Clean up directory name if it ends with /
+    const cleanName = isDirectory && name.endsWith("/") ? name.slice(0, -1) : name;
 
-      // check if this line contains links (but not sorting links)
-      const linkMatches = line.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi);
-
-      for (const linkMatch of linkMatches) {
-        const href = linkMatch[1] || "";
-        const linkText = (linkMatch[2] || "").trim();
-
-        // skip sorting links (those that start with ?)
-        if (href.startsWith("?")) continue;
-
-        // skip parent directory link
-        if (linkText === "Parent Directory" || href === "/") continue;
-
-        // determine if this is a directory or file
-        // Check for img tag with alt attribute first
-        let type: "directory" | "file" = "file";
-        const imgMatch = line.match(/<img[^>]+alt=["'](\[[^\]]+\])["'][^>]*>/i);
-
-        if (imgMatch) {
-          // has image - use alt attribute to determine type
-          const imgAlt = imgMatch[1];
-          type = imgAlt === "[DIR]" ? "directory" : "file";
-        } else {
-          // no image - determine by href ending with /
-          type = href.endsWith("/") ? "directory" : "file";
-        }
-
-        // extract date from the line content
-        const dateMatch = line.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
-        let lastModified;
-        if (dateMatch && dateMatch[0]) {
-          const dateString = dateMatch[0];
-          const date = new Date(`${dateString.replace(" ", "T")}:00Z`);
-          if (!Number.isNaN(date.getTime())) {
-            lastModified = date.getTime();
-          }
-        }
-
-        // clean up the name - remove trailing / for directories and decode HTML entities
-        let name = linkText;
-        if (type === "directory" && name.endsWith("/")) {
-          name = name.slice(0, -1);
-        }
-
-        // handle truncated names (ending with ..>)
-        if (name.endsWith("..>")) {
-          // try to extract the full name from href
-          const decodedHref = decodeURIComponent(href);
-          if (decodedHref !== href) {
-            // use the decoded href as the name (removing extension or trailing /)
-            name = decodedHref.replace(/\/$/, "").split("/").pop() || name;
-          }
-        }
-
-        const path = href;
-
-        if (type === "directory") {
-          entries.push({
-            type,
-            name,
-            path,
-            lastModified,
-            children: [],
-          });
-        } else {
-          entries.push({
-            type,
-            name,
-            path,
-            lastModified,
-          });
-        }
-      }
+    if (type === "directory") {
+      entries.push({
+        type,
+        name: cleanName,
+        path: href,
+        lastModified,
+        children: [],
+      });
+    } else {
+      entries.push({
+        type,
+        name: cleanName,
+        path: href,
+        lastModified,
+      });
     }
   }
 

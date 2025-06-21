@@ -109,7 +109,7 @@ describe("F1", () => {
     ]);
   });
 
-  it.todo("parse special files", () => {
+  it("parse special files", () => {
     const html = readFileSync(fixture("special-files.html"), "utf-8");
 
     const entry = parse(html, "F1");
@@ -125,8 +125,8 @@ describe("F1", () => {
       "file%22with%22double%22quotes.rb",
       "file%23with%23hash.py",
       "file%2520with%2520url%2520encoding.html",
-      "file&with&ampersands.php",
-      "file",
+      "file&with&ersands.php",
+      "file'with'quotes.sh",
       "file(with)parentheses.txt",
       "file+with+plus+signs.txt",
       "file,with,commas.csv",
