@@ -36,8 +36,21 @@ describe("Apache Custom Config Integration Test", async () => {
   });
 
   beforeAll(async () => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     apacheContainer = await new GenericContainer("httpd:2.4-alpine")
       .withExposedPorts(80)
+      .withCommand([
+        "sh",
+        "-c",
+        `apk add --no-cache tzdata && `
+        + `ln -snf /usr/share/zoneinfo/${timezone} /etc/localtime && `
+        + `echo "${timezone}" > /etc/timezone && `
+        + `exec httpd-foreground`,
+      ])
+      .withEnvironment({
+        TZ: timezone,
+      })
       .withBindMounts([
         {
           source: path.resolve("./test/configs/apache-fancy.conf"),
