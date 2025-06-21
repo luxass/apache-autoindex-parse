@@ -44,7 +44,7 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
 export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
   const root = __parse(html);
 
-  if (root == null) {
+  if (!root) {
     return null;
   }
 
