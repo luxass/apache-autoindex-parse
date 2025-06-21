@@ -93,7 +93,35 @@ export function inferFormat(html: string | HTMLElement): AutoIndexFormat {
     html = __parse(html);
   }
 
-  const hrefs = html.querySelectorAll("a[href]").map((el) => el.getAttribute("href")!).filter((href) => href.startsWith("?"));
+  const hrefs = [];
+
+  const pre = html.querySelector("pre");
+  // F1 is the only format that uses <pre> tags for wrapping the links
+  // which breaks the parsing logic of 'node-html-parser'
+  // so we need to handle it separately
+  if (pre) {
+    // If we have a <pre> tag, we assume it's F1 format
+    // but lets check to be sure.
+
+    const preContent = pre.textContent || "";
+    const parsedPre = __parse(preContent);
+    const links = parsedPre.querySelectorAll("a");
+
+    for (const link of links) {
+      const href = link.getAttribute("href");
+      if (href && href.startsWith("?")) {
+        hrefs.push(href);
+      }
+    }
+  } else {
+    const links = html.querySelectorAll("a");
+    for (const link of links) {
+      const href = link.getAttribute("href");
+      if (href && href.startsWith("?")) {
+        hrefs.push(href);
+      }
+    }
+  }
 
   // look for format parameter
   for (const href of hrefs) {
