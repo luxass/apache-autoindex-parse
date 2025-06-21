@@ -40,7 +40,7 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
   try {
     const res = await fetch(rootUrl, {
       headers: {
-        "User-Agent": "github.com/apache-autoindex-parse",
+        "User-Agent": "github.com/luxass/apache-autoindex-parse",
         ...options?.extraHeaders,
       },
       signal: options?.abortSignal,
