@@ -89,4 +89,56 @@ describe("F1", () => {
       },
     ]);
   });
+
+  it("parse directory", () => {
+    const html = readFileSync(fixture("directory.html"), "utf-8");
+
+    const entry = parse(html, "F1");
+
+    expect(entry).toBeDefined();
+
+    const paths = entry?.children.map((entry) => entry.path);
+
+    expect(paths).toStrictEqual([
+      "file%20with%20spaces.txt",
+      "file-with-dashes.html",
+      "file_with_underscores.json",
+      "level2/",
+      "simple.txt",
+      "%d1%84%d0%b0%d0%b9%d0%bb.txt",
+    ]);
+  });
+
+  it.todo("parse special files", () => {
+    const html = readFileSync(fixture("special-files.html"), "utf-8");
+
+    const entry = parse(html, "F1");
+
+    expect(entry).toBeDefined();
+
+    const paths = entry?.children.map((entry) => entry.path);
+
+    expect(paths).toStrictEqual([
+      "ReadMe.txt",
+      "UPPERCASE-FILE.XML",
+      "file%20with%20spaces.html",
+      "file%22with%22double%22quotes.rb",
+      "file%23with%23hash.py",
+      "file%2520with%2520url%2520encoding.html",
+      "file&amp;with&amp;ampersands.php",
+      "file",
+      "file(with)parentheses.txt",
+      "file+with+plus+signs.txt",
+      "file,with,commas.csv",
+      "file-with-dashes.css",
+      "file.with.dots.json",
+      "file@with@symbols.md",
+      "file%5bwith%5dbrackets.log",
+      "file_with_underscores.js",
+      "hello/",
+      "level1/",
+      "many-files/",
+      "normal-file.txt",
+    ]);
+  });
 });
