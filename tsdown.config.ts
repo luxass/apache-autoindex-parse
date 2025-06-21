@@ -9,6 +9,9 @@ export default defineConfig({
   exports: true,
   clean: true,
   dts: true,
+  noExternal: [
+    "node-html-parser",
+  ],
   treeshake: true,
   publint: true,
 });

@@ -48,14 +48,12 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "node-html-parser": "^7.0.1"
-  },
   "devDependencies": {
     "@luxass/eslint-config": "^5.0.0",
     "@types/node": "^22.10.10",
     "eslint": "^9.29.0",
     "eslint-plugin-format": "^1.0.1",
+    "node-html-parser": "^7.0.1",
     "publint": "^0.3.12",
     "testcontainers": "^11.0.3",
     "tsdown": "^0.12.8",

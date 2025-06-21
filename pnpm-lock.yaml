@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      node-html-parser:
-        specifier: ^7.0.1
-        version: 7.0.1
     devDependencies:
       '@luxass/eslint-config':
         specifier: ^5.0.0
@@ -24,6 +20,9 @@ importers:
       eslint-plugin-format:
         specifier: ^1.0.1
         version: 1.0.1(eslint@9.29.0(jiti@2.4.2))
+      node-html-parser:
+        specifier: ^7.0.1
+        version: 7.0.1
       publint:
         specifier: ^0.3.12
         version: 0.3.12
