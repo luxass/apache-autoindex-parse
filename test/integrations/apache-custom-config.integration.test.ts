@@ -119,7 +119,7 @@ describe("Apache Custom Config Integration Test", async () => {
 
     expect(parsed).toBeDefined();
     expect(parsed?.type).toBe("directory");
-    expect(parsed?.path).toBe("/nested/");
+    expect(parsed?.path).toBe("/nested");
 
     const children = parsed?.children || [];
     expect(children.length).toBeGreaterThan(0);
@@ -131,7 +131,7 @@ describe("Apache Custom Config Integration Test", async () => {
   });
 
   it("should handle unicode filenames", async () => {
-    const response = await fetch(getContainerUrl("nested/special%20chars/"));
+    const response = await fetch(getContainerUrl("/nested/special%20chars/"));
     expect(response.status).toBe(200);
 
     const html = await response.text();

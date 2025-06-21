@@ -228,13 +228,10 @@ function parseF1(html: HTMLElement): Entry[] {
       }
     }
 
-    // Clean up directory name if it ends with /
-    const cleanName = isDirectory && name.endsWith("/") ? name.slice(0, -1) : name;
-
     if (type === "directory") {
       entries.push({
         type,
-        name: cleanName,
+        name: name.slice(0, -1),
         path: href,
         lastModified,
         children: [],
@@ -242,7 +239,7 @@ function parseF1(html: HTMLElement): Entry[] {
     } else {
       entries.push({
         type,
-        name: cleanName,
+        name,
         path: href,
         lastModified,
       });
@@ -258,71 +255,87 @@ function parseF2(html: HTMLElement): Entry[] {
   const table = html.querySelector("table");
   if (!table) return entries;
 
-  const rowElements = table.querySelectorAll("tr");
+  const rows = table.querySelectorAll("tr");
+  if (!rows.length) return entries;
 
-  for (const row of rowElements) {
-    const rowContent = row.innerHTML;
+  // We skip the first row since it contains the headers
+  // and we assume the first row is always the header row
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
 
-    // skip header rows and divider rows
-    if (rowContent.includes("<th") || rowContent.includes("<hr")) {
+    if (!row) continue;
+
+    // skip row if it contains table headers or horizontal rules
+    if (row.querySelector("th") || row.querySelector("hr")) {
       continue;
     }
 
-    // extract cells
-    const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-    const cellMatches = Array.from(rowContent.matchAll(cellRegex));
-    const cells = cellMatches.map((match) => match[1] || "");
-
+    // get all cells in the row
+    const cells = row.querySelectorAll("td");
     if (cells.length < 3) continue;
 
-    // get image alt from first cell
-    const imgAltMatch = cells[0]?.match(/<img[^>]+alt=["'](\[[^\]]+\])["'][^>]*>/i);
-    if (!imgAltMatch || !imgAltMatch[1]) continue;
+    const iconCell = cells[0];
+    if (!iconCell) throw new Error("icon cell not found");
+    const linkCell = cells[1];
+    if (!linkCell) throw new Error("link cell not found");
 
-    const imgAlt = imgAltMatch[1];
+    const hasIcon = iconCell.querySelector("img") !== null;
 
-    // skip if not a directory or file
-    if (imgAlt !== "[DIR]" && imgAlt !== "[TXT]") {
-      // skip parent directory
-      if (imgAlt === "[PARENTDIR]") continue;
-
-      // skip rows without recognizable type
-      if (!imgAlt.startsWith("[")) continue;
+    function getIsParentDirectory() {
+      if (!hasIcon) return false;
+      const img = iconCell?.querySelector("img");
+      if (!img) return false;
+      const alt = img.getAttribute("alt");
+      return alt === "[PARENTDIR]";
     }
 
-    // get link and name from second cell
-    const linkMatch = cells[1]?.match(/<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>/i);
-    if (!linkMatch || !linkMatch[1]) continue;
+    function hasImageAlt(altText: string): boolean {
+      if (!hasIcon) return false;
+      const img = iconCell?.querySelector("img");
+      if (!img) return false;
+      const alt = img.getAttribute("alt");
+      return alt === altText;
+    }
 
-    const href = linkMatch[1] || "";
-    const name = (linkMatch[2] || "").trim();
+    if (getIsParentDirectory()) continue;
 
-    // skip parent directory
+    const link = linkCell.querySelector("a");
+    if (!link) continue;
+
+    // The link cell can also contain the root path of / in the href,
+    // if that is the case, we skip it
+    if (link.getAttribute("href") === "/") continue;
+
+    const href = link.getAttribute("href") || "";
+    const name = link.textContent.trim();
+
+    // skip parent directory by name as well
     if (name === "Parent Directory") continue;
 
-    // get date from the third cell
-    const dateText = cells[2]?.replace(/<[^>]+>/g, "").trim();
+    // get date cell (third cell)
+    const dateCell = cells[2];
+    if (!dateCell) throw new Error("date cell not found");
+    const dateText = dateCell.textContent.trim();
 
-    // parse the date
+    // Parse the date
     let lastModified;
-    if (dateText && dateText !== "&nbsp;") {
+    if (dateText && dateText !== "\xA0") { // \xa0 is &nbsp;
       const date = new Date(dateText);
       if (!Number.isNaN(date.getTime())) {
         lastModified = date.getTime();
       }
     }
 
-    // determine type
-    const type = imgAlt === "[DIR]" || href.endsWith("/") ? "directory" : "file";
+    // Determine type
+    const isDirectory = hasImageAlt("[DIR]") || href.endsWith("/");
+    const type = isDirectory ? "directory" : "file";
 
-    // use just the href as path
-    const path = href;
-
+    // Create the entry
     if (type === "directory") {
       entries.push({
         type,
-        name,
-        path,
+        name: name.slice(0, -1),
+        path: href,
         lastModified,
         children: [],
       });
@@ -330,7 +343,7 @@ function parseF2(html: HTMLElement): Entry[] {
       entries.push({
         type,
         name,
-        path,
+        path: href,
         lastModified,
       });
     }
