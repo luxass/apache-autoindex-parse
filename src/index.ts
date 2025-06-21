@@ -1,3 +1,6 @@
+import type { HTMLElement } from "node-html-parser";
+import { parse as __parse } from "node-html-parser";
+
 export interface FileEntry {
   type: "file";
   name: string;
@@ -39,27 +42,32 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
  * ```
  */
 export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
+  const root = __parse(html);
+
+  if (root == null) {
+    return null;
+  }
+
   // extract title and root path
-  const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
-  const titleText = titleMatch?.[1] || "";
+  const titleText = root.querySelector("title")?.text || "";
   const rootPath = titleText.split("Index of ")[1] ?? "/";
 
   let entries: Entry[] = [];
 
   if (!format) {
-    format = inferFormat(html);
+    format = inferFormat(root);
   }
 
   if (format === "F0") {
-    entries = parseF0(html);
+    entries = parseF0(root);
   }
 
   if (format === "F1") {
-    entries = parseF1(html);
+    entries = parseF1(root);
   }
 
   if (format === "F2") {
-    entries = parseF2(html);
+    entries = parseF2(root);
   }
 
   return {
@@ -76,17 +84,16 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
  * of an Apache AutoIndex page. It looks for URL parameters that indicate
  * the format (e.g., "F=2" in "?C=N;O=D;F=2").
  *
- * @param {string} html - The HTML content to analyze
+ * @param {string | HTMLElement} html - The HTML content to analyze
  * @returns {AutoIndexFormat} The inferred format as an AutoIndexFormat string (e.g., "F0", "F1", "F2", etc.)
  */
-export function inferFormat(html: string): AutoIndexFormat {
-  // find all href attributes in anchor tags using a regex
-  const hrefRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>/gi;
+export function inferFormat(html: string | HTMLElement): AutoIndexFormat {
+  if (typeof html === "string") {
+    // If html is a string, parse it to an HTMLElement
+    html = __parse(html);
+  }
 
-  // extract all hrefs that start with "?"
-  const hrefs = Array.from(html.matchAll(hrefRegex))
-    .map((match) => match[1])
-    .filter((href): href is string => href !== undefined && href.startsWith("?"));
+  const hrefs = html.querySelectorAll("a[href]").map((el) => el.getAttribute("href")!).filter((href) => href.startsWith("?"));
 
   // look for format parameter
   for (const href of hrefs) {
@@ -99,23 +106,21 @@ export function inferFormat(html: string): AutoIndexFormat {
   return "F0";
 }
 
-function parseF0(html: string): Entry[] {
+function parseF0(html: HTMLElement): Entry[] {
   const entries: Entry[] = [];
 
-  // find the first ul element and its li children
-  const ulMatch = html.match(/<ul[^>]*>([\s\S]*?)<\/ul>/i);
+  const ul = html.querySelector("ul");
 
-  if (!ulMatch || !ulMatch[1]) return entries;
+  if (!ul) return entries;
 
-  const ulContent = ulMatch[1];
-  const liRegex = /<li[^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>(.*?)<\/a>[\s\S]*?<\/li>/gi;
+  const liElements = ul.querySelectorAll("li");
 
-  // use matchAll to get all matches at once
-  const matches = Array.from(ulContent.matchAll(liRegex));
+  for (const li of liElements) {
+    const a = li.querySelector("a");
+    if (!a) continue;
 
-  for (const match of matches) {
-    const href = match[1] || "";
-    const name = (match[2] || "").trim();
+    const href = a.getAttribute("href") || "";
+    const name = a.textContent || "";
 
     const isDirectory = href.endsWith("/");
 
@@ -146,16 +151,14 @@ function parseF0(html: string): Entry[] {
   return entries;
 }
 
-function parseF1(html: string): Entry[] {
+function parseF1(html: HTMLElement): Entry[] {
   const entries: Entry[] = [];
 
-  // find all pre elements
-  const preRegex = /<pre[^>]*>([\s\S]*?)<\/pre>/gi;
-  const preMatches = Array.from(html.matchAll(preRegex));
+  const preElements = html.querySelectorAll("pre");
+  if (!preElements) return entries;
 
-  for (const preMatch of preMatches) {
-    if (!preMatch[1]) continue;
-    const preContent = preMatch[1];
+  for (const pre of preElements) {
+    const preContent = pre.textContent || "";
 
     // split content by lines to process each entry
     const lines = preContent.split("\n");
@@ -250,23 +253,16 @@ function parseF1(html: string): Entry[] {
   return entries;
 }
 
-function parseF2(html: string): Entry[] {
+function parseF2(html: HTMLElement): Entry[] {
   const entries: Entry[] = [];
 
-  // find the table and extract rows
-  const tableMatch = html.match(/<table[^>]*>([\s\S]*?)<\/table>/i);
+  const table = html.querySelector("table");
+  if (!table) return entries;
 
-  if (!tableMatch || !tableMatch[1]) return entries;
+  const rowElements = table.querySelectorAll("tr");
 
-  const tableContent = tableMatch[1];
-  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-
-  // get all rows at once
-  const rowMatches = Array.from(tableContent.matchAll(rowRegex));
-
-  for (const rowMatch of rowMatches) {
-    if (!rowMatch[1]) continue;
-    const rowContent = rowMatch[1];
+  for (const row of rowElements) {
+    const rowContent = row.innerHTML;
 
     // skip header rows and divider rows
     if (rowContent.includes("<th") || rowContent.includes("<hr")) {
