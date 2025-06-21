@@ -39,6 +39,9 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.32)(jiti@2.4.2)(yaml@2.8.0)
+      vitest-testdirs:
+        specifier: ^4.0.1
+        version: 4.0.1(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.15.32)(jiti@2.4.2)(yaml@2.8.0))
 
 packages:
 
@@ -2224,6 +2227,10 @@ packages:
   testcontainers@11.0.3:
     resolution: {integrity: sha512-Xu6ZAaE1FaLyHzFSYdCsd+xMPxUegUjkum0r6zgO8SinnFDHRX/PllIHMt1D+DVUmJqBvPQI6vge/J5jgE5vng==}
 
+  testdirs@3.0.0:
+    resolution: {integrity: sha512-2G7stHEavnUbvsS9LyGieuVyUVNVXAgeMfqiUtebmA63yJSgC6JBv3eTk3rmmDfrjB8wv1z+45Bn/awEI6e/yw==}
+    engines: {node: '>=20'}
+
   text-decoder@1.2.3:
     resolution: {integrity: sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==}
 
@@ -2400,6 +2407,12 @@ packages:
         optional: true
       yaml:
         optional: true
+
+  vitest-testdirs@4.0.1:
+    resolution: {integrity: sha512-yCXgvSQG8XXn++PnnKX5Fzmfm8y7u4fjhBqwFQz8aLFjdIualWrCGd0sC4UYKUE/mX+AWL3DqECwbmep+8TEQw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      vitest: '>=2.0.5 <4.0.0'
 
   vitest@3.2.4:
     resolution: {integrity: sha512-LUCP5ev3GURDysTWiP47wRRUpLKMOfPh+yKTx3kVIEiu5KOMeqzpnYNsKyOoVrULivR8tLcks4+lga33Whn90A==}
@@ -4929,6 +4942,8 @@ snapshots:
       - bare-buffer
       - supports-color
 
+  testdirs@3.0.0: {}
+
   text-decoder@1.2.3:
     dependencies:
       b4a: 1.6.7
@@ -5085,6 +5100,11 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.4.2
       yaml: 2.8.0
+
+  vitest-testdirs@4.0.1(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.15.32)(jiti@2.4.2)(yaml@2.8.0)):
+    dependencies:
+      testdirs: 3.0.0
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.32)(jiti@2.4.2)(yaml@2.8.0)
 
   vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.15.32)(jiti@2.4.2)(yaml@2.8.0):
     dependencies:

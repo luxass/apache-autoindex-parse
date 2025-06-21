@@ -60,7 +60,8 @@
     "testcontainers": "^11.0.3",
     "tsdown": "^0.12.8",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "vitest-testdirs": "^4.0.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
