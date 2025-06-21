@@ -57,6 +57,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "node-html-parser": "^7.0.1"
+  },
   "devDependencies": {
     "@luxass/eslint-config": "^5.0.0",
     "@types/node": "^22.10.10",
