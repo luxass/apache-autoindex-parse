@@ -148,7 +148,7 @@ function parseF0(html: HTMLElement): Entry[] {
     if (!a) continue;
 
     const href = a.getAttribute("href") || "";
-    const name = a.textContent || "";
+    const name = a.textContent.trim() || "";
 
     const isDirectory = href.endsWith("/");
 
