@@ -133,14 +133,14 @@ export function inferFormat(html: string | HTMLElement): AutoIndexFormat {
     if (formatMatch && formatMatch[1]) {
       return `F${formatMatch[1]}` as AutoIndexFormat;
     }
+  }
 
-    if (hasPre) {
-      return "F1";
-    }
+  if (hasPre) {
+    return "F1";
+  }
 
-    if (hasTable) {
-      return "F2";
-    }
+  if (hasTable) {
+    return "F2";
   }
 
   return "F0";
