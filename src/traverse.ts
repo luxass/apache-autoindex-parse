@@ -33,7 +33,7 @@ export interface TraverseOptions {
  *
  * @example
  * ```typescript
- * const directoryStructure = await traverse('[https://example.com/files/](https://example.com/files/)');
+ * const directoryStructure = await traverse('https://example.com/files');
  * ```
  */
 export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<RootEntry | null> {
