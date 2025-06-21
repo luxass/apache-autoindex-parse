@@ -125,7 +125,7 @@ describe("F1", () => {
       "file%22with%22double%22quotes.rb",
       "file%23with%23hash.py",
       "file%2520with%2520url%2520encoding.html",
-      "file&amp;with&amp;ampersands.php",
+      "file&with&ampersands.php",
       "file",
       "file(with)parentheses.txt",
       "file+with+plus+signs.txt",
