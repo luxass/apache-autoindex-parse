@@ -30,9 +30,12 @@ describe("Apache Custom Config Integration Test", async () => {
         },
       },
     },
-    "many-files": Array.from({ length: 10 }, (_, i) => ({
-      [`file-${String(i + 1).padStart(3, "0")}.txt`]: `Content of file ${i + 1}`,
-    })).reduce((acc, obj) => ({ ...acc, ...obj }), {}),
+    "many-files": Object.fromEntries(
+      Array.from({ length: 10 }, (_, i) => [
+        `file-${String(i + 1).padStart(3, "0")}.txt`,
+        `Content of file ${i + 1}`,
+      ]),
+    ),
   });
 
   beforeAll(async () => {
