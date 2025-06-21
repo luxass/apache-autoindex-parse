@@ -183,7 +183,7 @@ function parseF1(html: HTMLElement): Entry[] {
   const entries: Entry[] = [];
 
   const preElements = html.querySelectorAll("pre");
-  if (!preElements) return entries;
+  if (preElements.length === 0) return entries;
 
   for (const pre of preElements) {
     const preContent = pre.textContent || "";
