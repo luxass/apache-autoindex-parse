@@ -1,4 +1,4 @@
-import type { AutoIndexFormat, RootEntry } from "./index";
+import type { AutoIndexFormat, Entry } from "./index";
 import { parse } from "./index";
 
 export interface TraverseOptions {
@@ -21,6 +21,13 @@ export interface TraverseOptions {
   abortSignal?: AbortSignal;
 }
 
+export type EntryWithChildren = Entry & {
+  /**
+   * Children entries for directories
+   */
+  children?: EntryWithChildren[];
+};
+
 /**
  * Recursively traverses an Apache autoindex directory structure.
  *
@@ -29,14 +36,14 @@ export interface TraverseOptions {
  *
  * @param {string} rootUrl - The URL of the Apache autoindex directory to traverse
  * @param {TraverseOptions?} options - Optional configuration for the traversal process
- * @returns {Promise<RootEntry | null>} A promise that resolves to a RootEntry object representing the directory structure, or null if parsing failed
+ * @returns {Promise<EntryWithChildren[]>} A promise that resolves to a RootEntry object representing the directory structure, or null if parsing failed
  *
  * @example
  * ```typescript
  * const directoryStructure = await traverse('https://example.com/files');
  * ```
  */
-export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<RootEntry | null> {
+export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<EntryWithChildren[]> {
   try {
     const res = await fetch(rootUrl, {
       headers: {
@@ -51,25 +58,28 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
     }
 
     const html = await res.text();
-    const root = parse(html, options?.format);
+    const rootEntries = parse(html, options?.format);
 
-    if (!root) return null;
+    if (!rootEntries) return [];
 
-    await Promise.all(
-      root.children.map(async (entry) => {
-        if (entry.type === "directory") {
-          // Combine rootUrl with entry.path since entry.path is now relative
-          const childUrl = new URL(entry.path, rootUrl).href;
-          const child = await traverse(childUrl, options);
-          if (child) {
-            entry.children = child.children;
-          }
+    const entries = await Promise.all(
+      rootEntries.map(async (entry) => {
+        if (entry.type === "file") {
+          return entry;
         }
+
+        const childUrl = new URL(entry.path, rootUrl).href;
+        const child = await traverse(childUrl, options);
+
+        return {
+          ...entry,
+          children: child || [],
+        };
       }),
     );
 
-    return root;
+    return entries;
   } catch {
-    return null;
+    return [];
   }
 }
