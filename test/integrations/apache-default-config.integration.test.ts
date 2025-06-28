@@ -57,17 +57,12 @@ describe("Apache Integration Test (Default Config)", async () => {
 
     expect(response.ok).toBe(true);
 
-    const entry = parse(html);
+    const entries = parse(html);
 
-    expect(entry).toBeDefined();
-    expect(entry?.type).toBe("directory");
-    expect(entry?.path).toBe("/");
-    expect(entry?.children).toBeDefined();
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(0);
 
-    const children = entry?.children || [];
-    expect(children.length).toBeGreaterThan(0);
-
-    expect(children.some((child) => child.path === "ReadMe.txt")).toBe(true);
-    expect(children.some((child) => child.path === "hello.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "ReadMe.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "hello.txt")).toBe(true);
   });
 });

@@ -66,28 +66,22 @@ describe("Apache Integration Test (Simple Config)", async () => {
 
     expect(response.ok).toBe(true);
 
-    const entry = parse(html);
+    const entries = parse(html);
 
-    expect(entry).toBeDefined();
-    expect(entry?.type).toBe("directory");
-    expect(entry?.path).toBe("/");
-    expect(entry?.children).toBeDefined();
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(0);
 
-    const children = entry?.children || [];
-    expect(children.length).toBeGreaterThan(0);
-
-    expect(children.some((child) => child.path === "ReadMe.txt")).toBe(true);
-    expect(children.some((child) => child.path === "hello.txt")).toBe(true);
-    expect(children.some((child) => child.path === "nested/")).toBe(true);
+    expect(entries.some((child) => child.path === "ReadMe.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "hello.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "nested/")).toBe(true);
   });
 
   it("should handle files with special characters", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const children = parsed?.children || [];
-    const fileNames = children.map((c) => c.name);
+    const fileNames = entries.map((c) => c.name);
 
     expect(fileNames).toContain("file with spaces.txt");
     expect(fileNames).toContain("file-with-dashes.css");
@@ -98,12 +92,10 @@ describe("Apache Integration Test (Simple Config)", async () => {
   it("should not include lastModified dates in simple format", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
-
-    const children = parsed?.children || [];
+    const entries = parse(html);
 
     // F0 format should not include lastModified dates
-    const filesWithDates = children.filter((c) => c.lastModified);
+    const filesWithDates = entries.filter((c) => c.lastModified);
     expect(filesWithDates.length).toBe(0);
   });
 });

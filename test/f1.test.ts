@@ -18,11 +18,11 @@ describe("F1", () => {
   it("unicode.org's public directory listing", () => {
     const html = readFileSync(fixture("unicode-org.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "1.1-Update/",
@@ -77,7 +77,7 @@ describe("F1", () => {
       "zipped/",
     ]);
 
-    const files = entry?.children.filter((entry) => entry.type === "file");
+    const files = entries.filter((entry) => entry.type === "file");
 
     expect(files).toHaveLength(1);
     expect(files).toStrictEqual([
@@ -93,11 +93,11 @@ describe("F1", () => {
   it("parse directory", () => {
     const html = readFileSync(fixture("directory.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "file%20with%20spaces.txt",
@@ -112,11 +112,11 @@ describe("F1", () => {
   it("parse special files", () => {
     const html = readFileSync(fixture("special-files.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "ReadMe.txt",

@@ -79,28 +79,22 @@ describe("Apache Integration Test (Fancy Config)", async () => {
 
     expect(response.ok).toBe(true);
 
-    const entry = parse(html);
+    const entries = parse(html);
 
-    expect(entry).toBeDefined();
-    expect(entry?.type).toBe("directory");
-    expect(entry?.path).toBe("/");
-    expect(entry?.children).toBeDefined();
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(0);
 
-    const children = entry?.children || [];
-    expect(children.length).toBeGreaterThan(0);
-
-    expect(children.some((child) => child.path === "ReadMe.txt")).toBe(true);
-    expect(children.some((child) => child.path === "hello.txt")).toBe(true);
-    expect(children.some((child) => child.path === "nested/")).toBe(true);
+    expect(entries.some((child) => child.path === "ReadMe.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "hello.txt")).toBe(true);
+    expect(entries.some((child) => child.path === "nested/")).toBe(true);
   });
 
   it("should handle files with special characters", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const children = parsed?.children || [];
-    const fileNames = children.map((c) => c.name);
+    const fileNames = entries.map((c) => c.name);
 
     expect(fileNames).toContain("file with spaces.txt");
     expect(fileNames).toContain("file-with-dashes.css");
@@ -111,12 +105,10 @@ describe("Apache Integration Test (Fancy Config)", async () => {
   it("should include lastModified dates in fancy format", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
-
-    const children = parsed?.children || [];
+    const entries = parse(html);
 
     // F2 format should include lastModified dates
-    const filesWithDates = children.filter((c) => c.lastModified);
+    const filesWithDates = entries.filter((c) => c.lastModified);
     expect(filesWithDates.length).toBeGreaterThan(0);
 
     // Dates should be reasonable (within last hour)
@@ -132,11 +124,10 @@ describe("Apache Integration Test (Fancy Config)", async () => {
   it("should differentiate between files and directories", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const children = parsed?.children || [];
-    const files = children.filter((c) => c.type === "file");
-    const directories = children.filter((c) => c.type === "directory");
+    const files = entries.filter((c) => c.type === "file");
+    const directories = entries.filter((c) => c.type === "directory");
 
     expect(files.length).toBeGreaterThan(0);
     expect(directories.length).toBeGreaterThan(0);
@@ -166,8 +157,8 @@ describe("Apache Integration Test (Fancy Config)", async () => {
     expect(html).toContain("<tr");
     expect(html).toContain("<td");
 
-    const parsed = parse(html);
-    expect(parsed).toBeDefined();
-    expect(parsed?.children.length).toBeGreaterThan(0);
+    const entries = parse(html);
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(0);
   });
 });
