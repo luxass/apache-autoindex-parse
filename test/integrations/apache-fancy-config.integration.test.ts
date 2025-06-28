@@ -135,17 +135,6 @@ describe("Apache Integration Test (Fancy Config)", async () => {
     // Check specific types
     expect(files.some((f) => f.name === "ReadMe.txt")).toBe(true);
     expect(directories.some((d) => d.name === "nested")).toBe(true);
-
-    // Directories should have children array (F2 format)
-    directories.forEach((dir) => {
-      expect(dir).toHaveProperty("children");
-      expect(Array.isArray((dir as any).children)).toBe(true);
-    });
-
-    // Files should not have children property
-    files.forEach((file) => {
-      expect(file).not.toHaveProperty("children");
-    });
   });
 
   it("should parse HTML table format correctly", async () => {

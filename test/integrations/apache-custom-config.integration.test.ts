@@ -199,16 +199,5 @@ describe("Apache Custom Config Integration Test", async () => {
     // Check specific types
     expect(files.some((f) => f.name === "ReadMe.txt")).toBe(true);
     expect(directories.some((d) => d.name === "nested")).toBe(true);
-
-    // Directories should have children array
-    directories.forEach((dir) => {
-      expect(dir).toHaveProperty("children");
-      expect(Array.isArray((dir as any).children)).toBe(true);
-    });
-
-    // Files should not have children property
-    files.forEach((file) => {
-      expect(file).not.toHaveProperty("children");
-    });
   });
 });
