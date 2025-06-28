@@ -78,25 +78,20 @@ const format = "F2";
 const entry = parse(html, format);
 
 console.log(entry);
-// {
-//   type: 'directory',
-//   path: '/Public/emoji',
-//   children: [
-//     {
-//       type: 'directory',
-//       name: '1.0/',
-//       path: '/Public/emoji/1.0/',
-//       lastModified: 1432658400000,
-//       children: []
-//     },
-//     {
-//       type: 'file',
-//       name: 'ReadMe.txt',
-//       path: '/Public/emoji/ReadMe.txt',
-//       lastModified: 1739979360000
-//     }
-//   ]
-// }
+// [
+//   {
+//     type: 'directory',
+//     name: '1.0',
+//     path: '1.0/',
+//     lastModified: 1432658400000
+//   },
+//   {
+//     type: 'file',
+//     name: 'ReadMe.txt',
+//     path: 'ReadMe.txt',
+//     lastModified: 1739979360000
+//   }
+// ]
 ```
 
 > [!NOTE]
