@@ -94,18 +94,13 @@ describe("Apache Custom Config Integration Test", async () => {
   it("should parse root directory correctly", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    expect(parsed).toBeDefined();
-    expect(parsed?.type).toBe("directory");
-    expect(parsed?.path).toBe("/");
-    expect(parsed?.children).toBeDefined();
-
-    const children = parsed?.children || [];
-    expect(children.length).toBeGreaterThan(5);
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(5);
 
     // Check for expected files
-    const fileNames = children.map((child) => child.name);
+    const fileNames = entries.map((child) => child.name);
     expect(fileNames).toContain("ReadMe.txt");
     expect(fileNames).toContain("normal-file.html");
     expect(fileNames).toContain("nested");
@@ -115,9 +110,9 @@ describe("Apache Custom Config Integration Test", async () => {
   it("should handle files with special characters", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const fileNames = parsed?.children.map((c) => c.name) || [];
+    const fileNames = entries.map((c) => c.name);
     expect(fileNames).toContain("file with spaces.txt");
     expect(fileNames).toContain("file-with-dashes.css");
     expect(fileNames).toContain("file_with_underscores.js");
@@ -131,16 +126,12 @@ describe("Apache Custom Config Integration Test", async () => {
     expect(response.status).toBe(200);
 
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    expect(parsed).toBeDefined();
-    expect(parsed?.type).toBe("directory");
-    expect(parsed?.path).toBe("/nested");
+    expect(entries).toBeDefined();
+    expect(entries.length).toBeGreaterThan(0);
 
-    const children = parsed?.children || [];
-    expect(children.length).toBeGreaterThan(0);
-
-    const childNames = children.map((c) => c.name);
+    const childNames = entries.map((c) => c.name);
     expect(childNames).toContain("nestedFile.txt");
     expect(childNames).toContain("special chars");
     expect(childNames).toContain("deep");
@@ -151,10 +142,9 @@ describe("Apache Custom Config Integration Test", async () => {
     expect(response.status).toBe(200);
 
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const children = parsed?.children || [];
-    const fileNames = children.map((c) => c.name);
+    const fileNames = entries.map((c) => c.name);
 
     // Unicode filenames should be parsed correctly
     expect(fileNames.some((name) => name.includes("файл") || name.includes("%"))).toBe(true);
@@ -166,12 +156,12 @@ describe("Apache Custom Config Integration Test", async () => {
     expect(response.status).toBe(200);
 
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    expect(parsed).toBeDefined();
-    expect(parsed?.children.length).toBe(10);
+    expect(entries).toBeDefined();
+    expect(entries.length).toBe(10);
 
-    const fileNames = parsed?.children.map((c) => c.name) || [];
+    const fileNames = entries.map((c) => c.name);
     expect(fileNames).toContain("file-001.txt");
     expect(fileNames).toContain("file-010.txt");
   });
@@ -179,12 +169,10 @@ describe("Apache Custom Config Integration Test", async () => {
   it("should extract lastModified dates", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
-
-    const children = parsed?.children || [];
+    const entries = parse(html);
 
     // F2 format should include lastModified dates
-    const filesWithDates = children.filter((c) => c.lastModified);
+    const filesWithDates = entries.filter((c) => c.lastModified);
     expect(filesWithDates.length).toBeGreaterThan(0);
 
     // Dates should be reasonable (within last hour)
@@ -200,11 +188,10 @@ describe("Apache Custom Config Integration Test", async () => {
   it("should differentiate between files and directories", async () => {
     const response = await fetch(getContainerUrl());
     const html = await response.text();
-    const parsed = parse(html);
+    const entries = parse(html);
 
-    const children = parsed?.children || [];
-    const files = children.filter((c) => c.type === "file");
-    const directories = children.filter((c) => c.type === "directory");
+    const files = entries.filter((c) => c.type === "file");
+    const directories = entries.filter((c) => c.type === "directory");
 
     expect(files.length).toBeGreaterThan(0);
     expect(directories.length).toBeGreaterThan(0);
@@ -212,16 +199,5 @@ describe("Apache Custom Config Integration Test", async () => {
     // Check specific types
     expect(files.some((f) => f.name === "ReadMe.txt")).toBe(true);
     expect(directories.some((d) => d.name === "nested")).toBe(true);
-
-    // Directories should have children array
-    directories.forEach((dir) => {
-      expect(dir).toHaveProperty("children");
-      expect(Array.isArray((dir as any).children)).toBe(true);
-    });
-
-    // Files should not have children property
-    files.forEach((file) => {
-      expect(file).not.toHaveProperty("children");
-    });
   });
 });

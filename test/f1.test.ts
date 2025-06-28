@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { inferFormat, parse } from "../src";
+import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";
 
 const fixture = createFixture("F1");
@@ -18,11 +19,11 @@ describe("F1", () => {
   it("unicode.org's public directory listing", () => {
     const html = readFileSync(fixture("unicode-org.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "1.1-Update/",
@@ -77,7 +78,7 @@ describe("F1", () => {
       "zipped/",
     ]);
 
-    const files = entry?.children.filter((entry) => entry.type === "file");
+    const files = entries.filter((entry) => entry.type === "file");
 
     expect(files).toHaveLength(1);
     expect(files).toStrictEqual([
@@ -93,11 +94,11 @@ describe("F1", () => {
   it("parse directory", () => {
     const html = readFileSync(fixture("directory.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "file%20with%20spaces.txt",
@@ -112,11 +113,11 @@ describe("F1", () => {
   it("parse special files", () => {
     const html = readFileSync(fixture("special-files.html"), "utf-8");
 
-    const entry = parse(html, "F1");
+    const entries = parse(html, "F1");
 
-    expect(entry).toBeDefined();
+    expect(entries).toBeDefined();
 
-    const paths = entry?.children.map((entry) => entry.path);
+    const paths = entries.map((entry) => entry.path);
 
     expect(paths).toStrictEqual([
       "ReadMe.txt",
@@ -140,5 +141,42 @@ describe("F1", () => {
       "many-files/",
       "normal-file.txt",
     ]);
+  });
+
+  it("traverse directory structure", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    // Mock fetch to return our test fixtures
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const result = await traverse("http://example.com/test/", { format: "F1" });
+
+    expect(result).toBeDefined();
+    expect(result).toHaveLength(6);
+
+    // Find the level2 directory entry
+    const level2Dir = result.find((entry) => entry.name === "level2");
+    expect(level2Dir).toBeDefined();
+    expect(level2Dir?.type).toBe("directory");
+    expect(level2Dir?.children).toBeDefined();
+    expect(level2Dir?.children).toHaveLength(20);
+
+    // Verify some of the nested entries
+    const nestedFile = level2Dir?.children?.find((entry) => entry.name === "ReadMe.txt");
+    expect(nestedFile).toBeDefined();
+    expect(nestedFile?.type).toBe("file");
+
+    vi.unstubAllGlobals();
   });
 });

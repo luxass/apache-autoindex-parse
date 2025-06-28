@@ -13,16 +13,9 @@ export interface DirectoryEntry {
   name: string;
   path: string;
   lastModified?: number;
-  children: Entry[];
 }
 
 export type Entry = FileEntry | DirectoryEntry;
-
-export interface RootEntry {
-  type: "directory";
-  path: string;
-  children: Entry[];
-}
 
 export type AutoIndexFormat = "F0" | "F1" | "F2";
 
@@ -31,28 +24,22 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
  *
  * @param {string} html - The HTML content of the auto-indexed directory page to parse
  * @param {AutoIndexFormat?} format - Optional format specification of the auto-index page (will be inferred if not provided)
- * @returns {RootEntry | undefined} A RootEntry object representing the parsed directory structure, or null if parsing fails
+ * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
  *
  * @example
  * ```ts
  * const html = await fetch('http://example.com/files/').then(res => res.text());
- * const root = parse(html);
- * console.log(root.path); // '/files/'
- * console.log(root.children); // Array of file and directory entries
+ * const result = parse(html);
+ * console.log(result); // Array of file and directory entries
  * ```
  */
-export function parse(html: string, format?: AutoIndexFormat): RootEntry | null {
+export function parse(html: string, format?: AutoIndexFormat): Entry[] {
   const root = __parse(html);
 
-  if (!root) {
-    return null;
-  }
-
-  // extract title and root path
-  const titleText = root.querySelector("title")?.text || "";
-  const rootPath = titleText.split("Index of ")[1] ?? "/";
-
   let entries: Entry[] = [];
+  if (!root) {
+    return entries;
+  }
 
   if (!format) {
     format = inferFormat(root);
@@ -70,11 +57,7 @@ export function parse(html: string, format?: AutoIndexFormat): RootEntry | null 
     entries = parseF2(root);
   }
 
-  return {
-    type: "directory",
-    path: rootPath,
-    children: entries,
-  };
+  return entries;
 }
 
 /**
@@ -176,7 +159,6 @@ function parseF0(html: HTMLElement): Entry[] {
         name: name.slice(0, -1),
         path,
         lastModified: undefined,
-        children: [],
       });
     } else {
       entries.push({
@@ -234,7 +216,6 @@ function parseF1(html: HTMLElement): Entry[] {
         name: name.slice(0, -1),
         path: href,
         lastModified,
-        children: [],
       });
     } else {
       entries.push({
@@ -337,7 +318,6 @@ function parseF2(html: HTMLElement): Entry[] {
         name: name.slice(0, -1),
         path: href,
         lastModified,
-        children: [],
       });
     } else {
       entries.push({
