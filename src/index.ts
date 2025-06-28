@@ -24,7 +24,7 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
  *
  * @param {string} html - The HTML content of the auto-indexed directory page to parse
  * @param {AutoIndexFormat?} format - Optional format specification of the auto-index page (will be inferred if not provided)
- * @returns {Entry[]} An array of entries representing the parsed directory structure, or null if parsing fails
+ * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
  *
  * @example
  * ```ts

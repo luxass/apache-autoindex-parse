@@ -73,7 +73,7 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
 
         return {
           ...entry,
-          children: child || [],
+          children: child,
         };
       }),
     );
