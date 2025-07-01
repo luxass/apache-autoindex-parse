@@ -28,6 +28,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./test-utils": {
+      "import": "./dist/test-utils.js",
+      "require": "./dist/test-utils.cjs"
+    },
     "./traverse": {
       "import": "./dist/traverse.js",
       "require": "./dist/traverse.cjs"
