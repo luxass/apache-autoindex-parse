@@ -1,5 +1,6 @@
 import type { AutoIndexFormat, Entry } from "./index";
 import { parse } from "./index";
+import { addLeadingSlash, trimTrailingSlash } from "./lib";
 
 export interface TraverseOptions {
   /**
@@ -70,6 +71,9 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
 
         const childUrl = new URL(entry.path, rootUrl.endsWith("/") ? rootUrl : `${rootUrl}/`).href;
         const child = await traverse(childUrl, options);
+
+        entry.name = trimTrailingSlash(entry.name);
+        entry.path = addLeadingSlash(entry.path);
 
         return {
           ...entry,

@@ -1,5 +1,6 @@
 import type { HTMLElement } from "node-html-parser";
 import { parse as __parse } from "node-html-parser";
+import { addLeadingSlash, trimTrailingSlash } from "./lib";
 
 export interface FileEntry {
   type: "file";
@@ -156,15 +157,15 @@ function parseF0(html: HTMLElement): Entry[] {
     if (isDirectory) {
       entries.push({
         type: "directory",
-        name: name.slice(0, -1),
-        path,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(path),
         lastModified: undefined,
       });
     } else {
       entries.push({
         type: "file",
-        name,
-        path,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(path),
         lastModified: undefined,
       });
     }
@@ -213,15 +214,15 @@ function parseF1(html: HTMLElement): Entry[] {
     if (type === "directory") {
       entries.push({
         type,
-        name: name.slice(0, -1),
-        path: href,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(href),
         lastModified,
       });
     } else {
       entries.push({
         type,
-        name,
-        path: href,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(href),
         lastModified,
       });
     }
@@ -315,15 +316,15 @@ function parseF2(html: HTMLElement): Entry[] {
     if (type === "directory") {
       entries.push({
         type,
-        name: name.slice(0, -1),
-        path: href,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(href),
         lastModified,
       });
     } else {
       entries.push({
         type,
-        name,
-        path: href,
+        name: trimTrailingSlash(name),
+        path: addLeadingSlash(href),
         lastModified,
       });
     }
