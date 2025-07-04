@@ -179,4 +179,37 @@ describe("F2", () => {
 
     vi.unstubAllGlobals();
   });
+
+  it("traverse with entry paths having leading slash", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    // Mock fetch to verify URL construction with leading slash paths
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    // Test with root URL that has a path component
+    const result = await traverse("http://example.com/public/files", { format: "F2" });
+
+    expect(result).toBeDefined();
+    expect(result).toHaveLength(6);
+
+    // Verify that the nested directory URL was constructed correctly
+    // Entry path "/level2/" should be appended to base URL, not replace its path
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://example.com/public/files/level2/",
+      expect.any(Object),
+    );
+
+    vi.unstubAllGlobals();
+  });
 });
