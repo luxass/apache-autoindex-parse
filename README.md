@@ -82,13 +82,13 @@ console.log(entry);
 //   {
 //     type: 'directory',
 //     name: '1.0',
-//     path: '1.0/',
+//     path: '/1.0/',
 //     lastModified: 1432658400000
 //   },
 //   {
 //     type: 'file',
 //     name: 'ReadMe.txt',
-//     path: 'ReadMe.txt',
+//     path: '/ReadMe.txt',
 //     lastModified: 1739979360000
 //   }
 // ]
