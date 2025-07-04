@@ -69,7 +69,7 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
           return entry;
         }
 
-        const childUrl = rootUrl.endsWith("/") 
+        const childUrl = rootUrl.endsWith("/")
           ? rootUrl + (entry.path.startsWith("/") ? entry.path.slice(1) : entry.path)
           : rootUrl + (entry.path.startsWith("/") ? entry.path : `/${entry.path}`);
         const child = await traverse(childUrl, options);

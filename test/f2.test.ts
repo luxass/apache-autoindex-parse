@@ -207,7 +207,7 @@ describe("F2", () => {
     // Entry path "/level2/" should be appended to base URL, not replace its path
     expect(mockFetch).toHaveBeenCalledWith(
       "http://example.com/public/files/level2/",
-      expect.any(Object)
+      expect.any(Object),
     );
 
     vi.unstubAllGlobals();
