@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { inferFormat, parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";
@@ -168,6 +168,8 @@ describe("F1", () => {
     // Find the level2 directory entry
     const level2Dir = result.find((entry) => entry.name === "level2");
     expect(level2Dir).toBeDefined();
+
+    assert(level2Dir?.type === "directory");
     expect(level2Dir?.type).toBe("directory");
     expect(level2Dir?.children).toBeDefined();
     expect(level2Dir?.children).toHaveLength(20);

@@ -1,4 +1,4 @@
-import type { AutoIndexFormat, Entry } from "./index";
+import type { AutoIndexFormat, DirectoryEntry, Entry, FileEntry } from "./index";
 import { parse } from "./index";
 import { addLeadingSlash, trimTrailingSlash } from "./lib";
 
@@ -22,11 +22,8 @@ export interface TraverseOptions {
   abortSignal?: AbortSignal;
 }
 
-export type EntryWithChildren = Entry & {
-  /**
-   * Children entries for directories
-   */
-  children?: EntryWithChildren[];
+export type TraverseEntry = FileEntry | DirectoryEntry & {
+  children: TraverseEntry[];
 };
 
 /**
@@ -37,14 +34,14 @@ export type EntryWithChildren = Entry & {
  *
  * @param {string} rootUrl - The URL of the Apache autoindex directory to traverse
  * @param {TraverseOptions?} options - Optional configuration for the traversal process
- * @returns {Promise<EntryWithChildren[]>} A promise that resolves to a RootEntry object representing the directory structure, or null if parsing failed
+ * @returns {Promise<TraverseEntry[]>} A promise that resolves to a RootEntry object representing the directory structure, or null if parsing failed
  *
  * @example
  * ```typescript
  * const directoryStructure = await traverse('https://example.com/files');
  * ```
  */
-export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<EntryWithChildren[]> {
+export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
   try {
     const res = await fetch(rootUrl, {
       headers: {
