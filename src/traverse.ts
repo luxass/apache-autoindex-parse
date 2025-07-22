@@ -1,4 +1,4 @@
-import type { AutoIndexFormat, DirectoryEntry, Entry, FileEntry } from "./index";
+import type { AutoIndexFormat, DirectoryEntry, FileEntry } from "./index";
 import { parse } from "./index";
 import { addLeadingSlash, trimTrailingSlash } from "./lib";
 
