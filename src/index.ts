@@ -19,17 +19,19 @@ export type Entry = FileEntry | DirectoryEntry;
 export type AutoIndexFormat = "F0" | "F1" | "F2";
 
 /**
- * parses html content of an auto-indexed directory listing into a structured format.
+ * Parses HTML content of an auto-indexed directory listing into a structured format.
  *
- * @param {string} html - the html content of the auto-indexed directory page to parse
- * @param {AutoIndexFormat?} format - optional format specification of the auto-index page (will be inferred if not provided)
- * @returns {Entry[]} an array of entries representing the parsed directory structure, or empty array if parsing fails
+ * @param {string} html - The HTML content of the auto-indexed directory page to parse
+ * @param {AutoIndexFormat?} format - Optional format specification of the auto-index page (will be inferred if not provided)
+ * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
  *
  * @example
  * ```ts
+ * import { parse } from 'apache-autoindex-parse';
+ *
  * const html = await fetch('http://example.com/files/').then(res => res.text());
  * const result = parse(html);
- * console.log(result); // array of file and directory entries
+ * console.log(result); // Array of file and directory entries
  * ```
  */
 export function parse(html: string, format?: AutoIndexFormat): Entry[] {
@@ -58,14 +60,14 @@ export function parse(html: string, format?: AutoIndexFormat): Entry[] {
 }
 
 /**
- * infers the autoindexformat from html content.
+ * Infers the AutoIndexFormat from HTML content.
  *
- * this function examines the links on the page to determine the format
- * of an apache autoindex page. it looks for url parameters that indicate
- * the format (e.g., "f=2" in "?c=n;o=d;f=2").
+ * This function examines the links on the page to determine the format
+ * of an Apache AutoIndex page. It looks for URL parameters that indicate
+ * the format (e.g., "F=2" in "?C=N;O=D;F=2").
  *
- * @param {string} html - the html content to analyze
- * @returns {AutoIndexFormat} the inferred format as an autoindexformat string (e.g., "f0", "f1", "f2", etc.)
+ * @param {string} html - The HTML content to analyze
+ * @returns {AutoIndexFormat} The inferred format as an AutoIndexFormat string (e.g., "F0", "F1", "F2", etc.)
  */
 export function inferFormat(html: string): AutoIndexFormat {
   // look for format parameter in href attributes
