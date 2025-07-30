@@ -73,7 +73,7 @@ describe("Apache Integration Test (Simple Config)", async () => {
 
     expect(entries.some((child) => child.path === "/ReadMe.txt")).toBe(true);
     expect(entries.some((child) => child.path === "/hello.txt")).toBe(true);
-    expect(entries.some((child) => child.path === "/nested/")).toBe(true);
+    expect(entries.some((child) => child.path === "/nested")).toBe(true);
   });
 
   it("should handle files with special characters", async () => {

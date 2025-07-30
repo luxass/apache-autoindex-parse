@@ -158,14 +158,14 @@ function parseF0(html: HTMLElement): Entry[] {
       entries.push({
         type: "directory",
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(path),
+        path: trimTrailingSlash(addLeadingSlash(path)),
         lastModified: undefined,
       });
     } else {
       entries.push({
         type: "file",
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(path),
+        path: trimTrailingSlash(addLeadingSlash(path)),
         lastModified: undefined,
       });
     }
@@ -215,14 +215,14 @@ function parseF1(html: HTMLElement): Entry[] {
       entries.push({
         type,
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(href),
+        path: trimTrailingSlash(addLeadingSlash(href)),
         lastModified,
       });
     } else {
       entries.push({
         type,
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(href),
+        path: trimTrailingSlash(addLeadingSlash(href)),
         lastModified,
       });
     }
@@ -317,14 +317,14 @@ function parseF2(html: HTMLElement): Entry[] {
       entries.push({
         type,
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(href),
+        path: trimTrailingSlash(addLeadingSlash(href)),
         lastModified,
       });
     } else {
       entries.push({
         type,
         name: trimTrailingSlash(name),
-        path: addLeadingSlash(href),
+        path: trimTrailingSlash(addLeadingSlash(href)),
         lastModified,
       });
     }
