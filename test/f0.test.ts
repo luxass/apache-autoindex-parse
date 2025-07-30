@@ -126,7 +126,7 @@ describe("F0", () => {
       "/file%22with%22double%22quotes.rb",
       "/file%23with%23hash.py",
       "/file%2520with%2520url%2520encoding.html",
-      "/file&with&ampersands.php",
+      "/file&amp;with&amp;ampersands.php",
       "/file'with'quotes.sh",
       "/file(with)parentheses.txt",
       "/file+with+plus+signs.txt",
