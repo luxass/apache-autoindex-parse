@@ -38,6 +38,8 @@ export type TraverseEntry = FileEntry | DirectoryEntry & {
  *
  * @example
  * ```typescript
+ * import { traverse } from 'apache-autoindex-parse/traverse';
+ *
  * const directoryStructure = await traverse('https://example.com/files');
  * ```
  */
