@@ -1,4 +1,4 @@
-import { addLeadingSlash, trimTrailingSlash } from "./lib";
+import { trimTrailingSlash } from "./lib";
 
 export interface FileEntry {
   type: "file";
@@ -113,14 +113,14 @@ function parseF0(html: string): Entry[] {
       entries.push({
         type: "directory",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified: undefined,
       });
     } else {
       entries.push({
         type: "file",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified: undefined,
       });
     }
@@ -170,14 +170,14 @@ function parseF1(html: string): Entry[] {
       entries.push({
         type: "directory",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified,
       });
     } else {
       entries.push({
         type: "file",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified,
       });
     }
@@ -262,14 +262,14 @@ function parseF2(html: string): Entry[] {
       entries.push({
         type: "directory",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified,
       });
     } else {
       entries.push({
         type: "file",
         name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(addLeadingSlash(href)),
+        path: trimTrailingSlash(href),
         lastModified,
       });
     }
