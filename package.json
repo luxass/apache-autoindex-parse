@@ -8,7 +8,7 @@
     "email": "lucasnrgaard@gmail.com",
     "url": "https://luxass.dev"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "license": "MIT",
   "homepage": "https://github.com/luxass/apache-autoindex-parse",
   "repository": {
@@ -59,7 +59,7 @@
     "eslint-plugin-format": "^1.0.1",
     "publint": "^0.3.12",
     "testcontainers": "^11.3.1",
-    "tsdown": "^0.13.0",
+    "tsdown": "^0.14.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
     "vitest-testdirs": "^4.0.1"
