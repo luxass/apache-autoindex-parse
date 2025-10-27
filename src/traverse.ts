@@ -1,6 +1,6 @@
 import type { AutoIndexFormat, DirectoryEntry, FileEntry } from "./index";
 import { parse } from "./index";
-import { trimTrailingSlash } from "./lib";
+import { trimLeadingSlash, trimTrailingSlash } from "./lib";
 
 export interface TraverseOptions {
   /**
@@ -44,6 +44,10 @@ export type TraverseEntry = FileEntry | DirectoryEntry & {
  * ```
  */
 export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
+  return traverseInternal(rootUrl, "", options);
+}
+
+async function traverseInternal(rootUrl: string, pathPrefix: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
   try {
     const res = await fetch(rootUrl, {
       headers: {
@@ -64,20 +68,29 @@ export async function traverse(rootUrl: string, options?: TraverseOptions): Prom
 
     const entries = await Promise.all(
       rootEntries.map(async (entry) => {
+        let fullPath = pathPrefix
+          ? `${pathPrefix}/${entry.path}`
+          : entry.path;
+
+        fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
+
         if (entry.type === "file") {
-          return entry;
+          return {
+            ...entry,
+            path: fullPath,
+          };
         }
 
         const childUrl = rootUrl.endsWith("/")
           ? rootUrl + (entry.path.startsWith("/") ? entry.path.slice(1) : entry.path)
           : rootUrl + (entry.path.startsWith("/") ? entry.path : `/${entry.path}`);
-        const child = await traverse(childUrl, options);
+        const child = await traverseInternal(childUrl, fullPath, options);
 
         entry.name = trimTrailingSlash(entry.name);
-        entry.path = trimTrailingSlash(entry.path);
 
         return {
           ...entry,
+          path: fullPath,
           children: child,
         };
       }),
