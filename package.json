@@ -53,16 +53,16 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@luxass/eslint-config": "^5.1.1",
-    "@types/node": "^22.10.10",
+    "@luxass/eslint-config": "5.1.1",
+    "@types/node": "22.15.33",
     "eslint": "^9.31.0",
     "eslint-plugin-format": "^1.0.1",
-    "publint": "^0.3.12",
-    "testcontainers": "^11.3.1",
-    "tsdown": "^0.13.0",
-    "typescript": "^5.8.3",
+    "publint": "0.3.12",
+    "testcontainers": "11.3.1",
+    "tsdown": "0.13.0",
+    "typescript": "5.8.3",
     "vitest": "^3.2.4",
-    "vitest-testdirs": "^4.0.1"
+    "vitest-testdirs": "4.0.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
