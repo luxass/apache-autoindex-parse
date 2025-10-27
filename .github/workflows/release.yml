@@ -9,6 +9,7 @@ permissions: {}
 
 jobs:
   release:
+    environment: npm-registry
     permissions:
       id-token: write
       contents: write
