@@ -61,7 +61,7 @@
     "testcontainers": "11.3.1",
     "tsdown": "0.13.0",
     "typescript": "5.8.3",
-    "vitest": "^3.2.4",
+    "vitest": "3.2.4",
     "vitest-testdirs": "4.0.1"
   },
   "pnpm": {
