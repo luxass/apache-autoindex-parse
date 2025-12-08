@@ -30,15 +30,17 @@ export interface TraverseOptions {
 
   /**
    * Callback function invoked for each directory found during traversal.
-   * @param {DirectoryEntry} directory The directory entry object.
+   * @param {DirectoryEntryWithChildren} directory The directory entry object.
    * @returns {Promise<void>} A promise that resolves when the callback is complete.
    */
-  onDirectory?: (directory: DirectoryEntry) => Promise<void>;
+  onDirectory?: (directory: DirectoryEntryWithChildren) => Promise<void>;
 }
 
-export type TraverseEntry = FileEntry | DirectoryEntry & {
+type DirectoryEntryWithChildren = DirectoryEntry & {
   children: TraverseEntry[];
 };
+
+export type TraverseEntry = FileEntry | DirectoryEntryWithChildren;
 
 /**
  * Recursively traverses an Apache autoindex directory structure.
@@ -89,7 +91,7 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
         fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
 
         if (entry.type === "file") {
-          await options?.onFile?.(entry as FileEntry);
+          await options?.onFile?.(entry);
           return {
             ...entry,
             path: fullPath,
