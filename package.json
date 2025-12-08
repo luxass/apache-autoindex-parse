@@ -25,21 +25,21 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./test-utils": {
-      "import": "./dist/test-utils.js",
+      "import": "./dist/test-utils.mjs",
       "require": "./dist/test-utils.cjs"
     },
     "./traverse": {
-      "import": "./dist/traverse.js",
+      "import": "./dist/traverse.mjs",
       "require": "./dist/traverse.cjs"
     },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "files": [
     "dist"

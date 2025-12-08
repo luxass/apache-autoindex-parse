@@ -7,7 +7,9 @@ export default defineConfig({
     "./src/test-utils.ts",
   ],
   format: ["cjs", "esm"],
-  exports: true,
+  exports: {
+    enabled: "local-only",
+  },
   clean: true,
   dts: true,
   treeshake: true,
