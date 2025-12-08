@@ -91,11 +91,13 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
         fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
 
         if (entry.type === "file") {
-          await options?.onFile?.(entry);
-          return {
+          const newFileEntry = {
             ...entry,
             path: fullPath,
           };
+
+          await options?.onFile?.(newFileEntry);
+          return newFileEntry;
         }
 
         const childUrl = rootUrl.endsWith("/")
