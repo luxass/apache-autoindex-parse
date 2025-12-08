@@ -20,11 +20,27 @@ export interface TraverseOptions {
    * @default undefined
    */
   abortSignal?: AbortSignal;
+
+  /**
+   * Callback function invoked for each file found during traversal.
+   * @param {FileEntry} file The file entry object.
+   * @returns {Promise<void> | void} A promise or void that resolves when the callback is complete.
+   */
+  onFile?: (file: FileEntry) => Promise<void> | void;
+
+  /**
+   * Callback function invoked for each directory found during traversal.
+   * @param {DirectoryEntryWithChildren} directory The directory entry object.
+   * @returns {Promise<void> | void} A promise or void that resolves when the callback is complete.
+   */
+  onDirectory?: (directory: DirectoryEntryWithChildren) => Promise<void> | void;
 }
 
-export type TraverseEntry = FileEntry | DirectoryEntry & {
+type DirectoryEntryWithChildren = DirectoryEntry & {
   children: TraverseEntry[];
 };
+
+export type TraverseEntry = FileEntry | DirectoryEntryWithChildren;
 
 /**
  * Recursively traverses an Apache autoindex directory structure.
@@ -75,10 +91,13 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
         fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
 
         if (entry.type === "file") {
-          return {
+          const newFileEntry = {
             ...entry,
             path: fullPath,
           };
+
+          await options?.onFile?.(newFileEntry);
+          return newFileEntry;
         }
 
         const childUrl = rootUrl.endsWith("/")
@@ -88,11 +107,15 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
 
         entry.name = trimTrailingSlash(entry.name);
 
-        return {
+        const dirEntry = {
           ...entry,
           path: fullPath,
           children: child,
         };
+
+        await options?.onDirectory?.(dirEntry);
+
+        return dirEntry;
       }),
     );
 

@@ -214,4 +214,205 @@ describe("F1", () => {
 
     vi.unstubAllGlobals();
   });
+
+  it("traverse calls onFile callback for each file", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const onFile = vi.fn().mockResolvedValue(undefined);
+
+    await traverse("http://example.com/test/", {
+      format: "F1",
+      onFile,
+    });
+
+    expect(onFile).toHaveBeenCalled();
+
+    // verify onFile was called with file entries
+    const calls = onFile.mock.calls;
+    for (const call of calls) {
+      expect(call[0]).toHaveProperty("type", "file");
+      expect(call[0]).toHaveProperty("name");
+      expect(call[0]).toHaveProperty("path");
+    }
+
+    // verify specific files were passed to onFile
+    const fileNames = calls.map((call) => call[0].name);
+    expect(fileNames).toContain("simple.txt");
+    expect(fileNames).toContain("file-with-dashes.html");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("traverse calls onDirectory callback for each directory", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const onDirectory = vi.fn().mockResolvedValue(undefined);
+
+    await traverse("http://example.com/test/", {
+      format: "F1",
+      onDirectory,
+    });
+
+    expect(onDirectory).toHaveBeenCalled();
+
+    // verify onDirectory was called with directory entries
+    const calls = onDirectory.mock.calls;
+    for (const call of calls) {
+      expect(call[0]).toHaveProperty("type", "directory");
+      expect(call[0]).toHaveProperty("name");
+      expect(call[0]).toHaveProperty("path");
+      expect(call[0]).toHaveProperty("children");
+    }
+
+    // verify level2 directory was passed to onDirectory
+    const dirNames = calls.map((call) => call[0].name);
+    expect(dirNames).toContain("level2");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("traverse calls both onFile and onDirectory callbacks", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const onFile = vi.fn().mockResolvedValue(undefined);
+    const onDirectory = vi.fn().mockResolvedValue(undefined);
+
+    await traverse("http://example.com/test/", {
+      format: "F1",
+      onFile,
+      onDirectory,
+    });
+
+    expect(onFile).toHaveBeenCalled();
+    expect(onDirectory).toHaveBeenCalled();
+
+    // verify files and directories were handled separately
+    const fileCalls = onFile.mock.calls;
+    const dirCalls = onDirectory.mock.calls;
+
+    for (const call of fileCalls) {
+      expect(call[0].type).toBe("file");
+    }
+
+    for (const call of dirCalls) {
+      expect(call[0].type).toBe("directory");
+    }
+
+    vi.unstubAllGlobals();
+  });
+
+  it("traverse onDirectory receives children array", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(rootHtml),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(nestedHtml),
+      });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const onDirectory = vi.fn().mockResolvedValue(undefined);
+
+    await traverse("http://example.com/test/", {
+      format: "F1",
+      onDirectory,
+    });
+
+    // find the level2 directory callback
+    const level2Call = onDirectory.mock.calls.find((call) => call[0].name === "level2");
+    expect(level2Call).toBeDefined();
+
+    const level2Dir = level2Call![0];
+    expect(level2Dir.children).toBeDefined();
+    expect(level2Dir.children.length).toBeGreaterThan(0);
+
+    vi.unstubAllGlobals();
+  });
+
+  it("traverse callbacks are awaited", async () => {
+    const rootHtml = readFileSync(fixture("directory.html"), "utf-8");
+
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      text: () => Promise.resolve(rootHtml),
+    });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const callOrder: string[] = [];
+
+    const onFile = vi.fn().mockImplementation(async (file) => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      callOrder.push(`file:${file.name}`);
+    });
+
+    const onDirectory = vi.fn().mockImplementation(async (dir) => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      callOrder.push(`dir:${dir.name}`);
+    });
+
+    await traverse("http://example.com/test/", {
+      format: "F1",
+      onFile,
+      onDirectory,
+    });
+
+    // verify callbacks were called
+    expect(onFile).toHaveBeenCalled();
+    expect(onDirectory).toHaveBeenCalled();
+
+    // verify call order was recorded (callbacks were properly awaited)
+    expect(callOrder.length).toBeGreaterThan(0);
+
+    vi.unstubAllGlobals();
+  });
 });
