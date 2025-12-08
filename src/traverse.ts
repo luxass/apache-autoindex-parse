@@ -20,6 +20,20 @@ export interface TraverseOptions {
    * @default undefined
    */
   abortSignal?: AbortSignal;
+
+  /**
+   * Callback function invoked for each file found during traversal.
+   * @param {FileEntry} file The file entry object.
+   * @returns {Promise<void>} A promise that resolves when the callback is complete.
+   */
+  onFile?: (file: FileEntry) => Promise<void>;
+
+  /**
+   * Callback function invoked for each directory found during traversal.
+   * @param {DirectoryEntry} directory The directory entry object.
+   * @returns {Promise<void>} A promise that resolves when the callback is complete.
+   */
+  onDirectory?: (directory: DirectoryEntry) => Promise<void>;
 }
 
 export type TraverseEntry = FileEntry | DirectoryEntry & {
@@ -75,6 +89,7 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
         fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
 
         if (entry.type === "file") {
+          await options?.onFile?.(entry as FileEntry);
           return {
             ...entry,
             path: fullPath,
@@ -88,11 +103,15 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
 
         entry.name = trimTrailingSlash(entry.name);
 
-        return {
+        const dirEntry = {
           ...entry,
           path: fullPath,
           children: child,
         };
+
+        await options?.onDirectory?.(dirEntry);
+
+        return dirEntry;
       }),
     );
 
