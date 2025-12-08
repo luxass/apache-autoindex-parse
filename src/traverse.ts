@@ -24,16 +24,16 @@ export interface TraverseOptions {
   /**
    * Callback function invoked for each file found during traversal.
    * @param {FileEntry} file The file entry object.
-   * @returns {Promise<void>} A promise that resolves when the callback is complete.
+   * @returns {Promise<void> | void} A promise or void that resolves when the callback is complete.
    */
-  onFile?: (file: FileEntry) => Promise<void>;
+  onFile?: (file: FileEntry) => Promise<void> | void;
 
   /**
    * Callback function invoked for each directory found during traversal.
    * @param {DirectoryEntryWithChildren} directory The directory entry object.
-   * @returns {Promise<void>} A promise that resolves when the callback is complete.
+   * @returns {Promise<void> | void} A promise or void that resolves when the callback is complete.
    */
-  onDirectory?: (directory: DirectoryEntryWithChildren) => Promise<void>;
+  onDirectory?: (directory: DirectoryEntryWithChildren) => Promise<void> | void;
 }
 
 type DirectoryEntryWithChildren = DirectoryEntry & {
