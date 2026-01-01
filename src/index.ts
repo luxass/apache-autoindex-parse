@@ -1,4 +1,4 @@
-import { trimTrailingSlash } from "./lib";
+import { trimLeadingSlash, trimTrailingSlash } from "./lib";
 
 export interface FileEntry {
   type: "file";
@@ -125,7 +125,7 @@ export function parse(html: string, optionsOrFormat?: ParseOptions | AutoIndexFo
 
     entries = entries.map((entry) => ({
       ...entry,
-      path: `${basePathWithoutTrailing}/${entry.path}`,
+      path: `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
     }));
   }
 
