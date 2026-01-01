@@ -126,7 +126,7 @@ You can customize the output paths by providing a `basePath` option. This is use
 ```ts
 import { parse } from "apache-autoindex-parse";
 
-const html = await fetch("https://www.unicode.org/Public/emoji/").then(res => res.text());
+const html = await fetch("https://www.unicode.org/Public/emoji/").then((res) => res.text());
 
 // Prepend a base path to all entries
 const entries = parse(html, {
