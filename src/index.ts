@@ -144,7 +144,7 @@ export function parse(html: string, optionsOrFormat?: ParseOptions | AutoIndexFo
 
     entries = entries.map((entry) => ({
       ...entry,
-      path: `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
+      path: basePathWithoutTrailing === "/" ? basePathWithoutTrailing + entry.path : `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
     }));
   }
 

@@ -56,6 +56,18 @@ describe("basePath option", () => {
       expect(paths.every((p) => p.startsWith("/cdn/unicode/public/"))).toBe(true);
     });
 
+    it("handles root basePath correctly", () => {
+      const html = readFileSync(fixture("directory.html"), "utf-8");
+      const entries = parse(html, { format, basePath: "/" });
+
+      const paths = entries.map((e) => e.path);
+
+      expect(paths).toContain("/simple.txt");
+      expect(paths).toContain("/level2/");
+      expect(paths.every((p) => p.startsWith("/"))).toBe(true);
+      expect(paths.every((p) => !p.startsWith("//"))).toBe(true);
+    });
+
     it("returns unmodified paths when basePath is omitted", () => {
       const html = readFileSync(fixture("directory.html"), "utf-8");
       const entries = parse(html, { format });
@@ -247,6 +259,39 @@ describe("traverse with basePath", () => {
     const readmeFile = level2Dir.children.find((c) => c.name === "ReadMe.txt");
     expect(readmeFile).toBeDefined();
     expect(readmeFile!.path).toBe("/cdn/level2/ReadMe.txt");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("handles root basePath in traverse correctly", async () => {
+    const html = readFileSync(fixtureF2("directory.html"), "utf-8");
+    const emptyHtml = "<html><body></body></html>";
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve(html) })
+      .mockResolvedValue({ ok: true, text: () => Promise.resolve(emptyHtml) });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const entries = await traverse("http://example.com/test/", {
+      format: "F2",
+      basePath: "/",
+    });
+
+    expect(entries.length).toBeGreaterThan(0);
+
+    const paths = entries.map((e) => e.path);
+
+    // All paths should start with / but not //
+    expect(paths.every((p) => p.startsWith("/"))).toBe(true);
+    expect(paths.every((p) => !p.includes("//"))).toBe(true);
+
+    const simpleFile = entries.find((e) => e.name === "simple.txt");
+    expect(simpleFile!.path).toBe("/simple.txt");
+
+    const level2Dir = entries.find((e) => e.name === "level2");
+    expect(level2Dir!.path).toBe("/level2/");
 
     vi.unstubAllGlobals();
   });

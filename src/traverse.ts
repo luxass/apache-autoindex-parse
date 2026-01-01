@@ -160,7 +160,7 @@ function normalizeWithBasePath(path: string, isDirectory: boolean, basePath: str
   const basePathWithoutTrailing = trimTrailingSlash(normalizedBasePath);
 
   const trimmedPath = trimTrailingSlash(trimLeadingSlash(path));
-  const combined = `${basePathWithoutTrailing}/${trimmedPath}`;
+  const combined = basePathWithoutTrailing === "/" ? basePathWithoutTrailing + trimmedPath : `${basePathWithoutTrailing}/${trimmedPath}`;
 
   if (!isDirectory) {
     return combined;
