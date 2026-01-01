@@ -75,20 +75,42 @@ const format = "F2";
 
 // If you leave the format empty, it will try and auto-infer it.
 // If it can't infer it, it will default to "F0"
-const entry = parse(html, format);
+const entries = parse(html, format);
 
-console.log(entry);
+console.log(entries);
 // [
 //   {
 //     type: 'directory',
 //     name: '1.0',
-//     path: '/1.0/',
+//     path: '1.0',
 //     lastModified: 1432658400000
 //   },
 //   {
 //     type: 'file',
 //     name: 'ReadMe.txt',
-//     path: '/ReadMe.txt',
+//     path: 'ReadMe.txt',
+//     lastModified: 1739979360000
+//   }
+// ]
+
+// You can also use the options object to customize the output
+const entriesWithBasePath = parse(html, {
+  format: "F2",
+  basePath: "/cdn/unicode/public"
+});
+
+console.log(entriesWithBasePath);
+// [
+//   {
+//     type: 'directory',
+//     name: '1.0',
+//     path: '/cdn/unicode/public/1.0',
+//     lastModified: 1432658400000
+//   },
+//   {
+//     type: 'file',
+//     name: 'ReadMe.txt',
+//     path: '/cdn/unicode/public/ReadMe.txt',
 //     lastModified: 1739979360000
 //   }
 // ]
@@ -96,6 +118,37 @@ console.log(entry);
 
 > [!NOTE]
 > If you want to traverse an entire apache, you can utilize the `traverse` function which is being exported from `apache-autoindex-parse/traverse`.
+
+### Customizing Paths
+
+You can customize the output paths by providing a `basePath` option. This is useful when you want to map the parsed entries to a different location:
+
+```ts
+import { parse } from "apache-autoindex-parse";
+
+const html = await fetch("https://www.unicode.org/Public/emoji/").then(res => res.text());
+
+// Prepend a base path to all entries
+const entries = parse(html, {
+  basePath: "/cdn/unicode/emoji"
+});
+
+// All paths will now start with /cdn/unicode/emoji/
+console.log(entries[0].path); // e.g., "/cdn/unicode/emoji/1.0"
+```
+
+The `basePath` option is also available in the `traverse` function:
+
+```ts
+import { traverse } from "apache-autoindex-parse/traverse";
+
+const result = await traverse("https://www.unicode.org/Public/emoji/", {
+  basePath: "/cdn/unicode",
+  onFile: (file) => {
+    console.log(file.path); // e.g., "/cdn/unicode/1.0/ReadMe.txt"
+  }
+});
+```
 
 ## 📄 License
 
