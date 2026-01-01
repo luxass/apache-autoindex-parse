@@ -1,18 +1,37 @@
 import { trimLeadingSlash, trimTrailingSlash } from "./lib";
 
-export interface FileEntry {
-  type: "file";
+interface BaseEntry {
+  /**
+   * The name of the entry
+   */
   name: string;
+
+  /**
+   * The path of the entry relative to the root of the auto-indexed directory
+   *
+   * For directories, this path ends with a trailing slash ("/")
+   */
   path: string;
-  lastModified?: number;
+
+  /**
+   * The last modified timestamp of the entry in milliseconds since epoch
+   */
+  lastModified: number | undefined;
 }
 
-export interface DirectoryEntry {
+export type FileEntry = BaseEntry & {
+  /**
+   * The type of the entry (always "file" for file entries)
+   */
+  type: "file";
+};
+
+export type DirectoryEntry = BaseEntry & {
+  /**
+   * The type of the entry (always "directory" for directory entries)
+   */
   type: "directory";
-  name: string;
-  path: string;
-  lastModified?: number;
-}
+};
 
 export type Entry = FileEntry | DirectoryEntry;
 
@@ -27,7 +46,7 @@ export interface ParseOptions {
 
   /**
    * Optional base path to prepend to all entry paths
-   * @default undefined
+   * @default ""
    */
   basePath?: string;
 }
@@ -182,18 +201,21 @@ function parseF0(html: string): Entry[] {
     const cleanName = name.trim();
     const isDirectory = href.endsWith("/");
 
+    const normalizedName = trimTrailingSlash(cleanName);
+    const normalizedPath = normalizePath(href, isDirectory);
+
     if (isDirectory) {
       entries.push({
         type: "directory",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified: undefined,
       });
     } else {
       entries.push({
         type: "file",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified: undefined,
       });
     }
@@ -239,18 +261,21 @@ function parseF1(html: string): Entry[] {
       }
     }
 
+    const normalizedName = trimTrailingSlash(cleanName.trim());
+    const normalizedPath = normalizePath(href, isDirectory);
+
     if (isDirectory) {
       entries.push({
         type: "directory",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified,
       });
     } else {
       entries.push({
         type: "file",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified,
       });
     }
@@ -331,22 +356,39 @@ function parseF2(html: string): Entry[] {
       }
     }
 
+    const normalizedName = trimTrailingSlash(cleanName.trim());
+    const normalizedPath = normalizePath(href, isDirectory);
+
     if (isDirectory) {
       entries.push({
         type: "directory",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified,
       });
     } else {
       entries.push({
         type: "file",
-        name: trimTrailingSlash(cleanName),
-        path: trimTrailingSlash(href),
+        name: normalizedName,
+        path: normalizedPath,
         lastModified,
       });
     }
   }
 
   return entries;
+}
+
+function normalizePath(rawPath: string, isDirectory: boolean): string {
+  const trimmed = trimTrailingSlash(rawPath);
+
+  if (!isDirectory) {
+    return trimmed;
+  }
+
+  if (trimmed === "/") {
+    return trimmed;
+  }
+
+  return `${trimmed}/`;
 }

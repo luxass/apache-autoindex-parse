@@ -22,7 +22,7 @@ describe("basePath option", () => {
 
       expect(paths.every((p) => p.startsWith("/cdn/unicode/"))).toBe(true);
       expect(paths).toContain("/cdn/unicode/simple.txt");
-      expect(paths).toContain("/cdn/unicode/level2");
+      expect(paths).toContain("/cdn/unicode/level2/");
     });
 
     it("normalizes basePath without leading slash", () => {
@@ -33,7 +33,7 @@ describe("basePath option", () => {
 
       expect(paths.every((p) => p.startsWith("/public/"))).toBe(true);
       expect(paths).toContain("/public/simple.txt");
-      expect(paths).toContain("/public/level2");
+      expect(paths).toContain("/public/level2/");
     });
 
     it("strips trailing slash from basePath", () => {
@@ -75,7 +75,7 @@ describe("basePath option", () => {
     const file = entries.find((e) => e.type === "file");
 
     expect(dir).toBeDefined();
-    expect(dir!.path).toBe("/archive/1.1-Update");
+    expect(dir!.path).toBe("/archive/1.1-Update/");
     expect(dir!.name).toBe("1.1-Update");
 
     expect(file).toBeDefined();
@@ -114,7 +114,7 @@ describe("traverse with basePath", () => {
     expect(simpleFile!.path).toBe("/cdn/files/simple.txt");
 
     const level2Dir = entries.find((e) => e.name === "level2");
-    expect(level2Dir!.path).toBe("/cdn/files/level2");
+    expect(level2Dir!.path).toBe("/cdn/files/level2/");
 
     vi.unstubAllGlobals();
   });
@@ -172,7 +172,7 @@ describe("traverse with basePath", () => {
 
     expect(onDirectory).toHaveBeenCalled();
     expect(dirPaths.every((p) => p.startsWith("/cdn/"))).toBe(true);
-    expect(dirPaths).toContain("/cdn/level2");
+    expect(dirPaths).toContain("/cdn/level2/");
 
     vi.unstubAllGlobals();
   });
