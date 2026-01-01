@@ -163,7 +163,7 @@ function normalizeWithBasePath(path: string, isDirectory: boolean, basePath: str
   const combined = `${basePathWithoutTrailing}/${trimmedPath}`;
 
   if (!isDirectory) {
-    return trimTrailingSlash(combined);
+    return combined;
   }
 
   return ensureTrailingSlash(combined);
