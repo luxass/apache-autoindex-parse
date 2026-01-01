@@ -166,5 +166,5 @@ function normalizeWithBasePath(path: string, isDirectory: boolean, basePath: str
     return trimTrailingSlash(combined);
   }
 
-  return ensureTrailingSlash(trimTrailingSlash(combined));
+  return ensureTrailingSlash(combined);
 }
