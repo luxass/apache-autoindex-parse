@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { assert, describe, expect, it, vi } from "vitest";
 import { parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";
@@ -199,6 +199,54 @@ describe("traverse with basePath", () => {
 
     const simpleFile = entries.find((e) => e.name === "simple.txt");
     expect(simpleFile!.path).toBe("simple.txt");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("does not accumulate basePath in nested directories", async () => {
+    const rootHtml = readFileSync(fixtureF2("directory.html"), "utf-8");
+    const nestedHtml = readFileSync(fixtureF2("special-files.html"), "utf-8");
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve(rootHtml) })
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve(nestedHtml) });
+
+    vi.stubGlobal("fetch", mockFetch);
+
+    const entries = await traverse("http://example.com/test/", {
+      format: "F2",
+      basePath: "/cdn",
+    });
+
+    // Find the level2 directory which has nested content
+    const level2Dir = entries.find((e) => e.name === "level2");
+    expect(level2Dir).toBeDefined();
+    assert(level2Dir?.type === "directory");
+    expect(level2Dir.path).toBe("/cdn/level2/");
+
+    // Check nested children - basePath should be applied once, not accumulated
+    const nestedFiles = level2Dir.children.filter((c) => c.type === "file");
+    const nestedDirs = level2Dir.children.filter((c) => c.type === "directory");
+
+    // Verify nested files have basePath applied exactly once
+    expect(nestedFiles.length).toBeGreaterThan(0);
+    nestedFiles.forEach((file) => {
+      expect(file.path).toMatch(/^\/cdn\/level2\/[^/]+$/);
+      expect(file.path).not.toContain("/cdn/cdn/");
+    });
+
+    // Verify nested directories have basePath applied exactly once
+    expect(nestedDirs.length).toBeGreaterThan(0);
+    nestedDirs.forEach((dir) => {
+      expect(dir.path).toMatch(/^\/cdn\/level2\/[^/]+\/$/);
+      expect(dir.path).not.toContain("/cdn/cdn/");
+    });
+
+    // Check a specific nested file
+    const readmeFile = level2Dir.children.find((c) => c.name === "ReadMe.txt");
+    expect(readmeFile).toBeDefined();
+    expect(readmeFile!.path).toBe("/cdn/level2/ReadMe.txt");
 
     vi.unstubAllGlobals();
   });

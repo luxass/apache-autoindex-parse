@@ -115,7 +115,7 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
           ? `${rootUrl}${childPathSegment}`
           : `${rootUrl}/${childPathSegment}`;
 
-        const child = await traverseInternal(childUrl, fullPath, options);
+        const child = await traverseInternal(childUrl, normalized, options);
 
         entry.name = trimTrailingSlash(entry.name);
 
