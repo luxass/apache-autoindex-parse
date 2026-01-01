@@ -1,4 +1,4 @@
-import { trimTrailingSlash } from "./lib";
+import { trimLeadingSlash, trimTrailingSlash } from "./lib";
 
 export interface FileEntry {
   type: "file";
@@ -18,11 +18,24 @@ export type Entry = FileEntry | DirectoryEntry;
 
 export type AutoIndexFormat = "F0" | "F1" | "F2";
 
+export interface ParseOptions {
+  /**
+   * Optional format specification of the auto-index page (will be inferred if not provided)
+   * @default undefined
+   */
+  format?: AutoIndexFormat;
+
+  /**
+   * Optional base path to prepend to all entry paths
+   * @default undefined
+   */
+  basePath?: string;
+}
+
 /**
  * Parses HTML content of an auto-indexed directory listing into a structured format.
  *
  * @param {string} html - The HTML content of the auto-indexed directory page to parse
- * @param {AutoIndexFormat?} format - Optional format specification of the auto-index page (will be inferred if not provided)
  * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
  *
  * @example
@@ -34,10 +47,59 @@ export type AutoIndexFormat = "F0" | "F1" | "F2";
  * console.log(result); // Array of file and directory entries
  * ```
  */
-export function parse(html: string, format?: AutoIndexFormat): Entry[] {
+export function parse(html: string): Entry[];
+
+/**
+ * Parses HTML content of an auto-indexed directory listing into a structured format.
+ *
+ * @param {string} html - The HTML content of the auto-indexed directory page to parse
+ * @param {AutoIndexFormat} format - Format specification of the auto-index page
+ * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
+ *
+ * @example
+ * ```ts
+ * import { parse } from 'apache-autoindex-parse';
+ *
+ * const html = await fetch('http://example.com/files/').then(res => res.text());
+ * const result = parse(html, 'F1');
+ * console.log(result); // Array of file and directory entries
+ * ```
+ */
+export function parse(html: string, format?: AutoIndexFormat): Entry[];
+
+/**
+ * Parses HTML content of an auto-indexed directory listing into a structured format.
+ *
+ * @param {string} html - The HTML content of the auto-indexed directory page to parse
+ * @param {ParseOptions} options - Parse options including format and basePath
+ * @returns {Entry[]} An array of entries representing the parsed directory structure, or empty array if parsing fails
+ *
+ * @example
+ * ```ts
+ * import { parse } from 'apache-autoindex-parse';
+ *
+ * const html = await fetch('http://example.com/files/').then(res => res.text());
+ * const result = parse(html, { basePath: '/public/files' });
+ * console.log(result); // Array of file and directory entries with prefixed paths
+ * ```
+ */
+export function parse(html: string, options: ParseOptions): Entry[];
+
+export function parse(html: string, optionsOrFormat?: ParseOptions | AutoIndexFormat): Entry[] {
   let entries: Entry[] = [];
   if (!html) {
     return entries;
+  }
+
+  // Handle backward compatibility: if options is a string, treat it as format
+  let format: AutoIndexFormat | undefined;
+  let basePath: string | undefined;
+
+  if (typeof optionsOrFormat === "string") {
+    format = optionsOrFormat;
+  } else if (optionsOrFormat) {
+    format = optionsOrFormat.format;
+    basePath = optionsOrFormat.basePath;
   }
 
   if (!format) {
@@ -54,6 +116,17 @@ export function parse(html: string, format?: AutoIndexFormat): Entry[] {
 
   if (format === "F2") {
     entries = parseF2(html);
+  }
+
+  // Apply basePath if provided
+  if (basePath) {
+    const normalizedBasePath = basePath.startsWith("/") ? basePath : `/${basePath}`;
+    const basePathWithoutTrailing = trimTrailingSlash(normalizedBasePath);
+
+    entries = entries.map((entry) => ({
+      ...entry,
+      path: `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
+    }));
   }
 
   return entries;

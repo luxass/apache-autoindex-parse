@@ -10,6 +10,12 @@ export interface TraverseOptions {
   format?: AutoIndexFormat;
 
   /**
+   * Optional base path to prepend to all entry paths
+   * @default undefined
+   */
+  basePath?: string;
+
+  /**
    * Optional extra headers to include in the request
    * @default {}
    */
@@ -89,6 +95,13 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
           : entry.path;
 
         fullPath = trimTrailingSlash(trimLeadingSlash(fullPath));
+
+        // Apply basePath if provided
+        if (options?.basePath) {
+          const normalizedBasePath = options.basePath.startsWith("/") ? options.basePath : `/${options.basePath}`;
+          const basePathWithoutTrailing = trimTrailingSlash(normalizedBasePath);
+          fullPath = `${basePathWithoutTrailing}/${fullPath}`;
+        }
 
         if (entry.type === "file") {
           const newFileEntry = {
