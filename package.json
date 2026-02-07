@@ -54,15 +54,15 @@
   },
   "devDependencies": {
     "@luxass/eslint-config": "6.0.3",
-    "@types/node": "22.15.33",
+    "@types/node": "22.19.7",
     "eslint": "9.39.2",
     "eslint-plugin-format": "1.1.0",
-    "publint": "0.3.16",
+    "publint": "0.3.17",
     "testcontainers": "11.11.0",
-    "tsdown": "0.18.4",
+    "tsdown": "0.20.1",
     "typescript": "5.9.3",
     "vitest": "4.0.16",
-    "vitest-testdirs": "4.3.0"
+    "vitest-testdirs": "4.4.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
