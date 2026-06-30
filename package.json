@@ -55,8 +55,8 @@
   "devDependencies": {
     "@luxass/eslint-config": "6.0.3",
     "@types/node": "22.15.33",
-    "eslint": "9.39.2",
-    "eslint-plugin-format": "1.1.0",
+    "eslint": "10.5.0",
+    "eslint-plugin-format": "2.0.1",
     "publint": "0.3.16",
     "testcontainers": "11.11.0",
     "tsdown": "0.18.4",
