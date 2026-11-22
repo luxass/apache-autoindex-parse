@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
+
 import { assert, describe, expect, it, vi } from "vitest";
+
 import { parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";

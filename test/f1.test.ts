@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
+
 import { assert, describe, expect, it, vi } from "vitest";
+
 import { inferFormat, parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";
@@ -149,7 +151,8 @@ describe("F1", () => {
     const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
 
     // mock fetch to return our test fixtures
-    const mockFetch = vi.fn()
+    const mockFetch = vi
+      .fn()
       .mockResolvedValueOnce({
         ok: true,
         text: () => Promise.resolve(rootHtml),
@@ -188,7 +191,8 @@ describe("F1", () => {
     const nestedHtml = readFileSync(fixture("special-files.html"), "utf-8");
 
     // Mock fetch to verify URL construction with leading slash paths
-    const mockFetch = vi.fn()
+    const mockFetch = vi
+      .fn()
       .mockResolvedValueOnce({
         ok: true,
         text: () => Promise.resolve(rootHtml),

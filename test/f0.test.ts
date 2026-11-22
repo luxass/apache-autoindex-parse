@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
+
 import { assert, describe, expect, it, vi } from "vitest";
+
 import { inferFormat, parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";

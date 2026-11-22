@@ -1,9 +1,8 @@
 import type { StartedTestContainer } from "testcontainers";
 import { GenericContainer } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import {
-  testdir,
-} from "vitest-testdirs";
+import { testdir } from "vitest-testdirs";
+
 import { inferFormat, parse } from "../../src";
 
 // eslint-disable-next-line test/prefer-lowercase-title
@@ -12,9 +11,9 @@ describe("Apache Integration Test (Default Config)", async () => {
   const testdirPath = await testdir({
     "ReadMe.txt": `This is a test directory for Apache integration tests.`,
     "hello.txt": `Hello, world!`,
-    "nested": {
+    nested: {
       "nestedFile.txt": `This is a nested file.`,
-      "subdir": {
+      subdir: {
         "subdirFile.txt": `This is a file in a subdirectory.`,
       },
     },

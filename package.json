@@ -2,27 +2,32 @@
   "name": "apache-autoindex-parse",
   "version": "5.0.2",
   "description": "parse apache's autoindex html files",
-  "type": "module",
+  "keywords": [
+    "apache",
+    "autoindex",
+    "parse"
+  ],
+  "homepage": "https://github.com/luxass/apache-autoindex-parse",
+  "bugs": {
+    "url": "https://github.com/luxass/apache-autoindex-parse/issues"
+  },
+  "license": "MIT",
   "author": {
     "name": "Lucas Nørgård",
     "email": "lucasnrgaard@gmail.com",
     "url": "https://luxass.dev"
   },
-  "packageManager": "pnpm@12.21.0",
-  "license": "MIT",
-  "homepage": "https://github.com/luxass/apache-autoindex-parse",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/luxass/apache-autoindex-parse.git"
   },
-  "bugs": {
-    "url": "https://github.com/luxass/apache-autoindex-parse/issues"
-  },
-  "keywords": [
-    "autoindex",
-    "parse",
-    "apache"
+  "files": [
+    "dist"
   ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -38,12 +43,6 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.cts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -65,5 +64,6 @@
     "typescript": "catalog:dev",
     "vitest": "catalog:test",
     "vitest-testdirs": "catalog:test"
-  }
+  },
+  "packageManager": "pnpm@12.21.0"
 }

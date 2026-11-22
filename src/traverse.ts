@@ -69,7 +69,11 @@ export function traverse(rootUrl: string, options?: TraverseOptions): Promise<Tr
   return traverseInternal(rootUrl, "", options);
 }
 
-async function traverseInternal(rootUrl: string, pathPrefix: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
+async function traverseInternal(
+  rootUrl: string,
+  pathPrefix: string,
+  options?: TraverseOptions,
+): Promise<TraverseEntry[]> {
   try {
     const res = await fetch(rootUrl, {
       headers: {
@@ -80,7 +84,9 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
     });
 
     if (!res.ok) {
-      throw new Error(`failed to fetch directory listing from ${rootUrl}: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `failed to fetch directory listing from ${rootUrl}: ${res.status} ${res.statusText}`,
+      );
     }
 
     const html = await res.text();
@@ -88,7 +94,9 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
 
     if (!rootEntries) return [];
 
-    return await Promise.all(rootEntries.map((entry) => traverseEntry(entry, rootUrl, pathPrefix, options)));
+    return await Promise.all(
+      rootEntries.map((entry) => traverseEntry(entry, rootUrl, pathPrefix, options)),
+    );
   } catch {
     return [];
   }
@@ -144,7 +152,10 @@ function normalizeWithBasePath(path: string, isDirectory: boolean, basePath: str
   const basePathWithoutTrailing = trimTrailingSlash(normalizedBasePath);
 
   const trimmedPath = trimTrailingSlash(trimLeadingSlash(path));
-  const combined = basePathWithoutTrailing === "/" ? basePathWithoutTrailing + trimmedPath : `${basePathWithoutTrailing}/${trimmedPath}`;
+  const combined =
+    basePathWithoutTrailing === "/"
+      ? basePathWithoutTrailing + trimmedPath
+      : `${basePathWithoutTrailing}/${trimmedPath}`;
 
   if (!isDirectory) {
     return combined;

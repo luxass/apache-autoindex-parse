@@ -96,7 +96,7 @@ console.log(entries);
 // You can also use the options object to customize the output
 const entriesWithBasePath = parse(html, {
   format: "F2",
-  basePath: "/cdn/unicode/public"
+  basePath: "/cdn/unicode/public",
 });
 
 console.log(entriesWithBasePath);
@@ -130,7 +130,7 @@ const html = await fetch("https://www.unicode.org/Public/emoji/").then((res) => 
 
 // Prepend a base path to all entries
 const entries = parse(html, {
-  basePath: "/cdn/unicode/emoji"
+  basePath: "/cdn/unicode/emoji",
 });
 
 // All paths will now start with /cdn/unicode/emoji/
@@ -146,7 +146,7 @@ const result = await traverse("https://www.unicode.org/Public/emoji/", {
   basePath: "/cdn/unicode",
   onFile: (file) => {
     console.log(file.path); // e.g., "/cdn/unicode/1.0/ReadMe.txt"
-  }
+  },
 });
 ```
 

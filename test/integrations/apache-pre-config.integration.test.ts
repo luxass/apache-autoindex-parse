@@ -1,10 +1,10 @@
-import type { StartedTestContainer } from "testcontainers";
 import path from "node:path";
+
+import type { StartedTestContainer } from "testcontainers";
 import { GenericContainer } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import {
-  testdir,
-} from "vitest-testdirs";
+import { testdir } from "vitest-testdirs";
+
 import { inferFormat, parse } from "../../src";
 
 // eslint-disable-next-line test/prefer-lowercase-title
@@ -17,9 +17,9 @@ describe("Apache Integration Test (Pre Config)", async () => {
     "file-with-dashes.css": `/* CSS file */`,
     "file_with_underscores.js": `// JavaScript file`,
     "UPPERCASE-FILE.XML": `<?xml version='1.0'?>`,
-    "nested": {
+    nested: {
       "nestedFile.txt": `This is a nested file.`,
-      "subdir": {
+      subdir: {
         "subdirFile.txt": `This is a file in a subdirectory.`,
       },
     },
@@ -33,10 +33,10 @@ describe("Apache Integration Test (Pre Config)", async () => {
       .withCommand([
         "sh",
         "-c",
-        `apk add --no-cache tzdata && `
-        + `ln -snf /usr/share/zoneinfo/${timezone} /etc/localtime && `
-        + `echo "${timezone}" > /etc/timezone && `
-        + `exec httpd-foreground`,
+        `apk add --no-cache tzdata && ` +
+          `ln -snf /usr/share/zoneinfo/${timezone} /etc/localtime && ` +
+          `echo "${timezone}" > /etc/timezone && ` +
+          `exec httpd-foreground`,
       ])
       .withEnvironment({
         TZ: timezone,
@@ -112,7 +112,7 @@ describe("Apache Integration Test (Pre Config)", async () => {
 
     // Dates should be reasonable (within last hour)
     const now = Date.now();
-    const oneHourAgo = now - (60 * 60 * 1000);
+    const oneHourAgo = now - 60 * 60 * 1000;
 
     filesWithDates.forEach((file) => {
       expect(file.lastModified).toBeGreaterThan(oneHourAgo);
