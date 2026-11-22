@@ -1,4 +1,4 @@
-import type { AutoIndexFormat, DirectoryEntry, FileEntry } from "./index";
+import type { AutoIndexFormat, DirectoryEntry, Entry, FileEntry } from "./index";
 import { parse } from "./index";
 import { trimLeadingSlash, trimTrailingSlash } from "./lib";
 
@@ -65,11 +65,15 @@ export type TraverseEntry = FileEntry | DirectoryEntryWithChildren;
  * const directoryStructure = await traverse('https://example.com/files');
  * ```
  */
-export async function traverse(rootUrl: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
+export function traverse(rootUrl: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
   return traverseInternal(rootUrl, "", options);
 }
 
-async function traverseInternal(rootUrl: string, pathPrefix: string, options?: TraverseOptions): Promise<TraverseEntry[]> {
+async function traverseInternal(
+  rootUrl: string,
+  pathPrefix: string,
+  options?: TraverseOptions,
+): Promise<TraverseEntry[]> {
   try {
     const res = await fetch(rootUrl, {
       headers: {
@@ -80,7 +84,9 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
     });
 
     if (!res.ok) {
-      throw new Error(`failed to fetch directory listing from ${rootUrl}: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `failed to fetch directory listing from ${rootUrl}: ${res.status} ${res.statusText}`,
+      );
     }
 
     const html = await res.text();
@@ -88,53 +94,39 @@ async function traverseInternal(rootUrl: string, pathPrefix: string, options?: T
 
     if (!rootEntries) return [];
 
-    const entries = await Promise.all(
-      rootEntries.map(async (entry) => {
-        const joined = pathPrefix
-          ? `${trimTrailingSlash(pathPrefix)}/${trimLeadingSlash(entry.path)}`
-          : trimLeadingSlash(entry.path);
-
-        const normalized = normalizeTraversePath(joined, entry.type === "directory");
-
-        const fullPath = options?.basePath
-          ? normalizeWithBasePath(normalized, entry.type === "directory", options.basePath)
-          : normalized;
-
-        if (entry.type === "file") {
-          const newFileEntry = {
-            ...entry,
-            path: fullPath,
-          };
-
-          await options?.onFile?.(newFileEntry);
-          return newFileEntry;
-        }
-
-        const childPathSegment = trimLeadingSlash(entry.path);
-        const childUrl = rootUrl.endsWith("/")
-          ? `${rootUrl}${childPathSegment}`
-          : `${rootUrl}/${childPathSegment}`;
-
-        const child = await traverseInternal(childUrl, normalized, options);
-
-        entry.name = trimTrailingSlash(entry.name);
-
-        const dirEntry = {
-          ...entry,
-          path: fullPath,
-          children: child,
-        };
-
-        await options?.onDirectory?.(dirEntry);
-
-        return dirEntry;
-      }),
+    return await Promise.all(
+      rootEntries.map((entry) => traverseEntry(entry, rootUrl, pathPrefix, options)),
     );
-
-    return entries;
   } catch {
     return [];
   }
+}
+
+async function traverseEntry(
+  entry: Entry,
+  rootUrl: string,
+  pathPrefix: string,
+  options?: TraverseOptions,
+): Promise<TraverseEntry> {
+  const entryPath = trimLeadingSlash(entry.path);
+  const joined = pathPrefix ? `${trimTrailingSlash(pathPrefix)}/${entryPath}` : entryPath;
+  const isDirectory = entry.type === "directory";
+  const normalized = normalizeTraversePath(joined, isDirectory);
+  const path = options?.basePath
+    ? normalizeWithBasePath(normalized, isDirectory, options.basePath)
+    : normalized;
+
+  if (entry.type === "file") {
+    const file = { ...entry, path };
+    await options?.onFile?.(file);
+    return file;
+  }
+
+  const childUrl = rootUrl.endsWith("/") ? `${rootUrl}${entryPath}` : `${rootUrl}/${entryPath}`;
+  const children = await traverseInternal(childUrl, normalized, options);
+  const directory = { ...entry, name: trimTrailingSlash(entry.name), path, children };
+  await options?.onDirectory?.(directory);
+  return directory;
 }
 
 function ensureTrailingSlash(path: string): string {
@@ -160,7 +152,10 @@ function normalizeWithBasePath(path: string, isDirectory: boolean, basePath: str
   const basePathWithoutTrailing = trimTrailingSlash(normalizedBasePath);
 
   const trimmedPath = trimTrailingSlash(trimLeadingSlash(path));
-  const combined = basePathWithoutTrailing === "/" ? basePathWithoutTrailing + trimmedPath : `${basePathWithoutTrailing}/${trimmedPath}`;
+  const combined =
+    basePathWithoutTrailing === "/"
+      ? basePathWithoutTrailing + trimmedPath
+      : `${basePathWithoutTrailing}/${trimmedPath}`;
 
   if (!isDirectory) {
     return combined;

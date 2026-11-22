@@ -109,10 +109,14 @@ function generateF1Content(entries: Entry[], includeParent: boolean, title: stri
 
   for (const entry of entries) {
     const isDir = entry.type === "directory";
-    const icon = isDir ? `<img src="/icons/folder.gif" alt="[DIR]">` : `<img src="/icons/text.gif" alt="[TXT]">`;
+    const icon = isDir
+      ? `<img src="/icons/folder.gif" alt="[DIR]">`
+      : `<img src="/icons/text.gif" alt="[TXT]">`;
     const name = isDir ? `${entry.name}/` : entry.name;
     const href = entry.path;
-    const date = entry.lastModified ? new Date(entry.lastModified).toISOString().slice(0, 16).replace("T", " ") : "";
+    const date = entry.lastModified
+      ? new Date(entry.lastModified).toISOString().slice(0, 16).replace("T", " ")
+      : "";
     const size = isDir ? "-" : "0";
 
     content += `${icon} <a href="${href}">${name.padEnd(24)}</a> ${date.padEnd(17)} ${size.padStart(4)}   \n`;
@@ -133,10 +137,14 @@ function generateF2Content(entries: Entry[], includeParent: boolean, title: stri
 
   for (const entry of entries) {
     const isDir = entry.type === "directory";
-    const icon = isDir ? `<img src="/icons/folder.gif" alt="[DIR]">` : `<img src="/icons/text.gif" alt="[TXT]">`;
+    const icon = isDir
+      ? `<img src="/icons/folder.gif" alt="[DIR]">`
+      : `<img src="/icons/text.gif" alt="[TXT]">`;
     const name = isDir ? `${entry.name}/` : entry.name;
     const href = entry.path;
-    const date = entry.lastModified ? new Date(entry.lastModified).toISOString().slice(0, 16).replace("T", " ") : "&nbsp;";
+    const date = entry.lastModified
+      ? new Date(entry.lastModified).toISOString().slice(0, 16).replace("T", " ")
+      : "&nbsp;";
     const size = isDir ? "  - " : "  0 ";
 
     content += `<tr><td valign="top">${icon}</td><td><a href="${href}">${name}</a></td><td align="right">${date}  </td><td align="right">${size}</td><td>&nbsp;</td></tr>\n`;
@@ -183,25 +191,29 @@ export function createSampleEntries(): Entry[] {
       type: "directory",
       name: "docs",
       path: "docs/",
-      lastModified: Date.now() - 86400000, // 1 day ago
+      // 1 day ago
+      lastModified: Date.now() - 86400000,
     },
     {
       type: "directory",
       name: "src",
       path: "src/",
-      lastModified: Date.now() - 3600000, // 1 hour ago
+      // 1 hour ago
+      lastModified: Date.now() - 3600000,
     },
     {
       type: "file",
       name: "README.md",
       path: "README.md",
-      lastModified: Date.now() - 1800000, // 30 minutes ago
+      // 30 minutes ago
+      lastModified: Date.now() - 1800000,
     },
     {
       type: "file",
       name: "package.json",
       path: "package.json",
-      lastModified: Date.now() - 7200000, // 2 hours ago
+      // 2 hours ago
+      lastModified: Date.now() - 7200000,
     },
   ];
 }

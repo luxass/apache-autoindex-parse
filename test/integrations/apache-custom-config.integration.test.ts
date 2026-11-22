@@ -1,30 +1,31 @@
-import type { StartedTestContainer } from "testcontainers";
 import path from "node:path";
+
 import { GenericContainer } from "testcontainers";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { testdir } from "vitest-testdirs";
+
 import { inferFormat, parse } from "../../src";
+import { registerApacheContainer } from "./apache-container";
 
 // eslint-disable-next-line test/prefer-lowercase-title
 describe("Apache Custom Config Integration Test", async () => {
-  let apacheContainer: StartedTestContainer;
   const testdirPath = await testdir({
     "ReadMe.txt": "This is a test directory for Apache integration tests.",
     "normal-file.html": "<h1>Normal File</h1>",
     "file with spaces.txt": "File with spaces in name",
     "file-with-dashes.css": "/* CSS file */",
     "file_with_underscores.js": "// JavaScript file",
-    "file.with.dots.json": "{\"test\": true}",
+    "file.with.dots.json": '{"test": true}',
     "UPPERCASE-FILE.XML": "<?xml version='1.0'?>",
     "file(with)parentheses.log": "Log file content",
     "file[with]brackets.md": "# Markdown file",
-    "nested": {
+    nested: {
       "nestedFile.txt": "This is a nested file.",
       "special chars": {
         "файл.txt": "Unicode filename",
         "中文文件.txt": "Chinese filename",
       },
-      "deep": {
+      deep: {
         level: {
           "deepFile.txt": "Deep nested file",
         },
@@ -38,18 +39,18 @@ describe("Apache Custom Config Integration Test", async () => {
     ),
   });
 
-  beforeAll(async () => {
+  const getContainerUrl = registerApacheContainer(() => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    apacheContainer = await new GenericContainer("httpd:2.4-alpine")
+    return new GenericContainer("httpd:2.4-alpine")
       .withExposedPorts(80)
       .withCommand([
         "sh",
         "-c",
-        `apk add --no-cache tzdata && `
-        + `ln -snf /usr/share/zoneinfo/${timezone} /etc/localtime && `
-        + `echo "${timezone}" > /etc/timezone && `
-        + `exec httpd-foreground`,
+        `apk add --no-cache tzdata && ` +
+          `ln -snf /usr/share/zoneinfo/${timezone} /etc/localtime && ` +
+          `echo "${timezone}" > /etc/timezone && ` +
+          `exec httpd-foreground`,
       ])
       .withEnvironment({
         TZ: timezone,
@@ -66,16 +67,6 @@ describe("Apache Custom Config Integration Test", async () => {
       ])
       .start();
   });
-
-  afterAll(async () => {
-    await apacheContainer.stop();
-  });
-
-  function getContainerUrl(path = "/") {
-    const port = apacheContainer.getMappedPort(80);
-    const host = apacheContainer.getHost();
-    return `http://${host}:${port}${path}`;
-  }
 
   it("should start container successfully", async () => {
     const response = await fetch(getContainerUrl());
@@ -177,7 +168,7 @@ describe("Apache Custom Config Integration Test", async () => {
 
     // Dates should be reasonable (within last hour)
     const now = Date.now();
-    const oneHourAgo = now - (60 * 60 * 1000);
+    const oneHourAgo = now - 60 * 60 * 1000;
 
     filesWithDates.forEach((file) => {
       expect(file.lastModified).toBeGreaterThan(oneHourAgo);

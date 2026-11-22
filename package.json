@@ -2,27 +2,32 @@
   "name": "apache-autoindex-parse",
   "version": "5.0.2",
   "description": "parse apache's autoindex html files",
-  "type": "module",
+  "keywords": [
+    "apache",
+    "autoindex",
+    "parse"
+  ],
+  "homepage": "https://github.com/luxass/apache-autoindex-parse",
+  "bugs": {
+    "url": "https://github.com/luxass/apache-autoindex-parse/issues"
+  },
+  "license": "MIT",
   "author": {
     "name": "Lucas Nørgård",
     "email": "lucasnrgaard@gmail.com",
     "url": "https://luxass.dev"
   },
-  "packageManager": "pnpm@10.34.5",
-  "license": "MIT",
-  "homepage": "https://github.com/luxass/apache-autoindex-parse",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/luxass/apache-autoindex-parse.git"
   },
-  "bugs": {
-    "url": "https://github.com/luxass/apache-autoindex-parse/issues"
-  },
-  "keywords": [
-    "autoindex",
-    "parse",
-    "apache"
+  "files": [
+    "dist"
   ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -38,35 +43,27 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.cts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@luxass/eslint-config": "6.0.3",
-    "@types/node": "22.15.33",
-    "eslint": "9.39.2",
-    "eslint-plugin-format": "1.1.0",
-    "publint": "0.3.16",
-    "testcontainers": "11.11.0",
-    "tsdown": "0.18.4",
-    "typescript": "5.9.3",
-    "vitest": "4.0.16",
-    "vitest-testdirs": "4.3.0"
+    "@types/node": "catalog:types",
+    "oxfmt": "catalog:dev",
+    "oxlint": "catalog:dev",
+    "publint": "catalog:dev",
+    "testcontainers": "catalog:test",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:test",
+    "vitest-testdirs": "catalog:test"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  "packageManager": "pnpm@12.21.0"
 }

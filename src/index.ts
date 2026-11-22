@@ -144,7 +144,10 @@ export function parse(html: string, optionsOrFormat?: ParseOptions | AutoIndexFo
 
     entries = entries.map((entry) => ({
       ...entry,
-      path: basePathWithoutTrailing === "/" ? basePathWithoutTrailing + entry.path : `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
+      path:
+        basePathWithoutTrailing === "/"
+          ? basePathWithoutTrailing + entry.path
+          : `${basePathWithoutTrailing}/${trimLeadingSlash(entry.path)}`,
     }));
   }
 
@@ -163,14 +166,14 @@ export function parse(html: string, optionsOrFormat?: ParseOptions | AutoIndexFo
  */
 export function inferFormat(html: string): AutoIndexFormat {
   // look for format parameter in href attributes
-  const formatMatch = html.match(/href="[^"]*[?&]F=(\d)[^"]*"/);
+  const formatMatch = html.match(/href="[^"]*[?&]F=(\d)[^"]*"/u);
   if (formatMatch && formatMatch[1]) {
     return `F${formatMatch[1]}` as AutoIndexFormat;
   }
 
   // check for structural indicators
-  const hasPre = /<pre[^>]*>/.test(html);
-  const hasTable = /<table[^>]*>/.test(html);
+  const hasPre = /<pre[^>]*>/u.test(html);
+  const hasTable = /<table[^>]*>/u.test(html);
 
   if (hasPre) {
     return "F1";
@@ -187,7 +190,7 @@ function parseF0(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // match <li><a href="...">...</a></li> patterns
-  const linkRegex = /<li[^>]*>\s*<a\s+href="([^"]*)"[^>]*>([^<]+)<\/a>\s*<\/li>/gi;
+  const linkRegex = /<li[^>]*>\s*<a\s+href="([^"]*)"[^>]*>([^<]+)<\/a>\s*<\/li>/giu;
   let match;
 
   // eslint-disable-next-line no-cond-assign
@@ -198,27 +201,7 @@ function parseF0(html: string): Entry[] {
       continue;
     }
 
-    const cleanName = name.trim();
-    const isDirectory = href.endsWith("/");
-
-    const normalizedName = trimTrailingSlash(cleanName);
-    const normalizedPath = normalizePath(href, isDirectory);
-
-    if (isDirectory) {
-      entries.push({
-        type: "directory",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified: undefined,
-      });
-    } else {
-      entries.push({
-        type: "file",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified: undefined,
-      });
-    }
+    entries.push(createParsedEntry(name, href, href.endsWith("/")));
   }
 
   return entries;
@@ -228,14 +211,14 @@ function parseF1(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // extract content from <pre> tag
-  const preMatch = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+  const preMatch = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/iu);
   if (!preMatch || !preMatch[1]) return entries;
 
   const preContent = preMatch[1];
 
   // match links with surrounding context for date extraction
   // this regex captures the link and the text around it to extract dates
-  const linkRegex = /<a\s+href="([^"]*)"[^>]*>([^<]*)<\/a>([^<\n]*)/gi;
+  const linkRegex = /<a\s+href="([^"]*)"[^>]*>([^<]*)<\/a>([^<\n]*)/giu;
   let match;
 
   // eslint-disable-next-line no-cond-assign
@@ -246,39 +229,10 @@ function parseF1(html: string): Entry[] {
       continue;
     }
 
-    const cleanName = name.trim();
-    const isDirectory = href.endsWith("/");
-
-    // extract date from the text after the link
-    let lastModified;
-    if (afterText) {
-      const dateMatch = afterText.match(/(\d{2}-\w{3}-\d{4}\s+\d{2}:\d{2}|\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
-      if (dateMatch && dateMatch[0]) {
-        const date = new Date(dateMatch[0]);
-        if (!Number.isNaN(date.getTime())) {
-          lastModified = date.getTime();
-        }
-      }
-    }
-
-    const normalizedName = trimTrailingSlash(cleanName.trim());
-    const normalizedPath = normalizePath(href, isDirectory);
-
-    if (isDirectory) {
-      entries.push({
-        type: "directory",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified,
-      });
-    } else {
-      entries.push({
-        type: "file",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified,
-      });
-    }
+    const dateText = afterText?.match(
+      /(\d{2}-\w{3}-\d{4}\s+\d{2}:\d{2}|\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/u,
+    )?.[0];
+    entries.push(createParsedEntry(name, href, href.endsWith("/"), parseEntryTimestamp(dateText)));
   }
 
   return entries;
@@ -288,7 +242,7 @@ function parseF2(html: string): Entry[] {
   const entries: Entry[] = [];
 
   // match table rows, excluding header rows and hr rows
-  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/giu;
   let match;
 
   // eslint-disable-next-line no-cond-assign
@@ -298,12 +252,12 @@ function parseF2(html: string): Entry[] {
     if (!rowContent) continue;
 
     // skip rows with th elements or hr elements
-    if (/<th[^>]*>/.test(rowContent) || /<hr[^>]*>/.test(rowContent)) {
+    if (/<th[^>]*>/u.test(rowContent) || /<hr[^>]*>/u.test(rowContent)) {
       continue;
     }
 
     // extract cells
-    const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+    const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/giu;
     const cells = [];
     let cellMatch;
 
@@ -321,14 +275,14 @@ function parseF2(html: string): Entry[] {
     const dateCell = cells[2];
 
     // check for parent directory icon
-    if (iconCell && /alt="\[PARENTDIR\]"/.test(iconCell)) {
+    if (iconCell && /alt="\[PARENTDIR\]"/u.test(iconCell)) {
       continue;
     }
 
     // extract link information
     if (!linkCell) continue;
 
-    const linkMatch = linkCell.match(/<a\s+href="([^"]*)"[^>]*>([^<]*)<\/a>/i);
+    const linkMatch = linkCell.match(/<a\s+href="([^"]*)"[^>]*>([^<]*)<\/a>/iu);
     if (!linkMatch || !linkMatch[1] || !linkMatch[2]) continue;
 
     const [, href, name] = linkMatch;
@@ -338,45 +292,36 @@ function parseF2(html: string): Entry[] {
       continue;
     }
 
-    const cleanName = name.trim();
-    if (!cleanName) continue;
+    if (!name.trim()) continue;
 
-    // determine if it's a directory
-    const isDirectory = (iconCell && /alt="\[DIR\]"/.test(iconCell)) || href.endsWith("/");
-
-    // parse date
-    let lastModified;
-    if (dateCell) {
-      const dateText = dateCell.replace(/<[^>]*>/g, "").trim();
-      if (dateText && dateText !== "\xA0" && dateText !== "&nbsp;") {
-        const date = new Date(dateText);
-        if (!Number.isNaN(date.getTime())) {
-          lastModified = date.getTime();
-        }
-      }
-    }
-
-    const normalizedName = trimTrailingSlash(cleanName.trim());
-    const normalizedPath = normalizePath(href, isDirectory);
-
-    if (isDirectory) {
-      entries.push({
-        type: "directory",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified,
-      });
-    } else {
-      entries.push({
-        type: "file",
-        name: normalizedName,
-        path: normalizedPath,
-        lastModified,
-      });
-    }
+    const isDirectory = href.endsWith("/") || /alt="\[DIR\]"/u.test(iconCell ?? "");
+    const dateText = dateCell?.replaceAll(/<[^>]*>/gu, "").trim();
+    entries.push(createParsedEntry(name, href, isDirectory, parseEntryTimestamp(dateText)));
   }
 
   return entries;
+}
+
+function parseEntryTimestamp(dateText?: string): number | undefined {
+  if (!dateText || dateText === "&nbsp;") {
+    return undefined;
+  }
+  const timestamp = new Date(dateText).getTime();
+  return Number.isNaN(timestamp) ? undefined : timestamp;
+}
+
+function createParsedEntry(
+  name: string,
+  path: string,
+  isDirectory: boolean,
+  lastModified?: number,
+): Entry {
+  return {
+    type: isDirectory ? "directory" : "file",
+    name: trimTrailingSlash(name.trim()),
+    path: normalizePath(path, isDirectory),
+    lastModified,
+  };
 }
 
 function normalizePath(rawPath: string, isDirectory: boolean): string {

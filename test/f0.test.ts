@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
+import { setTimeout as delay } from "node:timers/promises";
+
 import { assert, describe, expect, it, vi } from "vitest";
+
 import { inferFormat, parse } from "../src";
 import { traverse } from "../src/traverse";
 import { createFixture } from "./__utils";
@@ -200,7 +203,7 @@ describe("F0", () => {
 
     vi.stubGlobal("fetch", mockFetch);
 
-    const onFile = vi.fn().mockResolvedValue(undefined);
+    const onFile = vi.fn().mockImplementation(() => Promise.resolve());
 
     await traverse("http://example.com/test/", {
       format: "F0",
@@ -244,7 +247,7 @@ describe("F0", () => {
 
     vi.stubGlobal("fetch", mockFetch);
 
-    const onDirectory = vi.fn().mockResolvedValue(undefined);
+    const onDirectory = vi.fn().mockImplementation(() => Promise.resolve());
 
     await traverse("http://example.com/test/", {
       format: "F0",
@@ -288,8 +291,8 @@ describe("F0", () => {
 
     vi.stubGlobal("fetch", mockFetch);
 
-    const onFile = vi.fn().mockResolvedValue(undefined);
-    const onDirectory = vi.fn().mockResolvedValue(undefined);
+    const onFile = vi.fn().mockImplementation(() => Promise.resolve());
+    const onDirectory = vi.fn().mockImplementation(() => Promise.resolve());
 
     await traverse("http://example.com/test/", {
       format: "F0",
@@ -332,7 +335,7 @@ describe("F0", () => {
 
     vi.stubGlobal("fetch", mockFetch);
 
-    const onDirectory = vi.fn().mockResolvedValue(undefined);
+    const onDirectory = vi.fn().mockImplementation(() => Promise.resolve());
 
     await traverse("http://example.com/test/", {
       format: "F0",
@@ -363,12 +366,12 @@ describe("F0", () => {
     const callOrder: string[] = [];
 
     const onFile = vi.fn().mockImplementation(async (file) => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await delay(10);
       callOrder.push(`file:${file.name}`);
     });
 
     const onDirectory = vi.fn().mockImplementation(async (dir) => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await delay(10);
       callOrder.push(`dir:${dir.name}`);
     });
 
