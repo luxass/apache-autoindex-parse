@@ -244,14 +244,14 @@ describe("traverse with basePath", () => {
     // Verify nested files have basePath applied exactly once
     expect(nestedFiles.length).toBeGreaterThan(0);
     nestedFiles.forEach((file) => {
-      expect(file.path).toMatch(/^\/cdn\/level2\/[^/]+$/);
+      expect(file.path).toMatch(/^\/cdn\/level2\/[^/]+$/u);
       expect(file.path).not.toContain("/cdn/cdn/");
     });
 
     // Verify nested directories have basePath applied exactly once
     expect(nestedDirs.length).toBeGreaterThan(0);
     nestedDirs.forEach((dir) => {
-      expect(dir.path).toMatch(/^\/cdn\/level2\/[^/]+\/$/);
+      expect(dir.path).toMatch(/^\/cdn\/level2\/[^/]+\/$/u);
       expect(dir.path).not.toContain("/cdn/cdn/");
     });
 

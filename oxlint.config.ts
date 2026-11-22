@@ -14,7 +14,24 @@ export default defineConfig({
     "no-shadow": "off",
     "eslint/eqeqeq": ["warn", "always", { null: "ignore" }],
     "typescript/no-explicit-any": "error",
+    "eslint/max-lines": ["warn", { skipBlankLines: true, skipComments: true }],
+    "eslint/max-lines-per-function": ["warn", { skipBlankLines: true, skipComments: true }],
     curly: "off",
   },
+  overrides: [
+    {
+      files: ["playground.ts"],
+      rules: {
+        "no-console": ["error", { allow: ["error", "log"] }],
+      },
+    },
+    {
+      files: ["test/**/*.test.ts"],
+      rules: {
+        "eslint/max-lines": "off",
+        "eslint/max-lines-per-function": "off",
+      },
+    },
+  ],
   ignorePatterns: ["test/fixtures/**"],
 });

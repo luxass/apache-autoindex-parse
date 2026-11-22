@@ -183,25 +183,29 @@ export function createSampleEntries(): Entry[] {
       type: "directory",
       name: "docs",
       path: "docs/",
-      lastModified: Date.now() - 86400000, // 1 day ago
+      // 1 day ago
+      lastModified: Date.now() - 86400000,
     },
     {
       type: "directory",
       name: "src",
       path: "src/",
-      lastModified: Date.now() - 3600000, // 1 hour ago
+      // 1 hour ago
+      lastModified: Date.now() - 3600000,
     },
     {
       type: "file",
       name: "README.md",
       path: "README.md",
-      lastModified: Date.now() - 1800000, // 30 minutes ago
+      // 30 minutes ago
+      lastModified: Date.now() - 1800000,
     },
     {
       type: "file",
       name: "package.json",
       path: "package.json",
-      lastModified: Date.now() - 7200000, // 2 hours ago
+      // 2 hours ago
+      lastModified: Date.now() - 7200000,
     },
   ];
 }

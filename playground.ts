@@ -32,8 +32,9 @@ async function main() {
   console.log(JSON.stringify(traversedEntries, null, 2));
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error("Unexpected error while running playground:", error);
-  // eslint-disable-next-line node/prefer-global/process
   process.exit(1);
-});
+}
