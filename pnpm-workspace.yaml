@@ -1,6 +1,9 @@
 ignoreScripts: true
 minimumReleaseAge: 7200
 minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  # Remove after 2026-11-27 03:05 UTC, when the suite fixture fix is five days old.
+  - vitest-testdirs@4.5.3
 trustPolicy: no-downgrade
 strictDepBuilds: true
 blockExoticSubdeps: true
@@ -17,7 +20,7 @@ catalogs:
   test:
     testcontainers: 12.2.1
     vitest: 5.1.0
-    vitest-testdirs: 4.5.2
+    vitest-testdirs: 4.5.3
 
   types:
     "@types/node": 24.19.2
