@@ -1,15 +1,14 @@
 import path from "node:path";
 
-import type { StartedTestContainer } from "testcontainers";
 import { GenericContainer } from "testcontainers";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { testdir } from "vitest-testdirs";
 
 import { inferFormat, parse } from "../../src";
+import { registerApacheContainer } from "./apache-container";
 
 // eslint-disable-next-line test/prefer-lowercase-title
 describe("Apache Custom Config Integration Test", async () => {
-  let apacheContainer: StartedTestContainer;
   const testdirPath = await testdir({
     "ReadMe.txt": "This is a test directory for Apache integration tests.",
     "normal-file.html": "<h1>Normal File</h1>",
@@ -40,10 +39,10 @@ describe("Apache Custom Config Integration Test", async () => {
     ),
   });
 
-  beforeAll(async () => {
+  const getContainerUrl = registerApacheContainer(() => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    apacheContainer = await new GenericContainer("httpd:2.4-alpine")
+    return new GenericContainer("httpd:2.4-alpine")
       .withExposedPorts(80)
       .withCommand([
         "sh",
@@ -68,16 +67,6 @@ describe("Apache Custom Config Integration Test", async () => {
       ])
       .start();
   });
-
-  afterAll(async () => {
-    await apacheContainer.stop();
-  });
-
-  function getContainerUrl(path = "/") {
-    const port = apacheContainer.getMappedPort(80);
-    const host = apacheContainer.getHost();
-    return `http://${host}:${port}${path}`;
-  }
 
   it("should start container successfully", async () => {
     const response = await fetch(getContainerUrl());
